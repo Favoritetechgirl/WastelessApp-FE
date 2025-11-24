@@ -489,6 +489,7 @@ const Onboarding = () => {
               {/* NAVIGATOR */}
 
               <div className='h-20 w-full mb-12 lg:mb-0 flex items-center justify-between lg:justify-end p-3'>
+                
                 <button
                   onClick={() => setOnboardingSlide((prev) => prev + 1)}
                   className='bg-green-500 text-white py-4 px-10 rounded-4xl'>

@@ -4,15 +4,20 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import Onboarding from './components/Onboarding'
 import ItemEntry from './components/ItemEntry'
+import SortAndFilter from './components/SortAndFilter'
+import ItemDetails from './components/ItemDetails'
 
+import { FoodHero } from './components/Modals'
 function App() {
+
   const [count, setCount] = useState(0)
 
   return (
     <>
-      <ItemEntry />
+      <FoodHero />
     </>
   )
+  
 }
 
 export default App
