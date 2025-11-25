@@ -21,6 +21,7 @@ const DeleteModal = () => {
           <button className='bg-red-500 text-white py-3 w-9/12 px-10 rounded-4xl mb-4'>Yes, Delete It</button>
 
           <button className='text-black bg-gray-200 w-9/12 py-3 rounded-4xl'>Wait, Go Back</button>
+          
         </div>
 
       </div>
