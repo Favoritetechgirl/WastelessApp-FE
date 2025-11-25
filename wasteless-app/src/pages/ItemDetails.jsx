@@ -10,7 +10,7 @@ const ItemDetails = () => {
       {/* Mobile Screen */}
       <div className='w-screen border-4 border-green-500'>
         
-        <div className='flex items-center justify-between p-3 py-4'>
+        <div className='flex items-center justify-between p-3 py-4 sticky top-0 bg-white'>
           <ArrowLeft />
 
           <span>Item Details</span>
@@ -137,7 +137,7 @@ const ItemDetails = () => {
 
           </div>
 
-          <button className='bg-green-500 text-white py-3 px-10 rounded-4xl w-full'>
+          <button className='bg-green-500 text-white py-3 px-10 rounded-full w-full'>
             Update Status
           </button>
 
@@ -147,7 +147,7 @@ const ItemDetails = () => {
 
       {/* DESKTOP SCREEN */}
       <div>
-
+        
       </div>
     </div>
   )
