@@ -7,14 +7,16 @@ import ItemEntry from './components/ItemEntry'
 import SortAndFilter from './components/SortAndFilter'
 import ItemDetails from './components/ItemDetails'
 
-import { FoodHero } from './components/Modals'
+import FoodHero from './components/Modals'
+import DeleteModal from './components/DeleteModal'
+
 function App() {
 
   const [count, setCount] = useState(0)
 
   return (
     <>
-      <FoodHero />
+      <DeleteModal />
     </>
   )
   
