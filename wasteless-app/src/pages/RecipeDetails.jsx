@@ -1,5 +1,6 @@
 import React from 'react'
 import { ArrowRight, ArrowLeft, Clock, TicketCheck, CheckCircle } from 'lucide-react'
+import PageTop from '../components/modals/PageTop'
 
 
 const RecipeDetails = () => {
@@ -11,7 +12,7 @@ const RecipeDetails = () => {
 
       <div className='main h-full w-full lg:w-4xl lg:h-fit lg:max-h-4/5 bg-white p-3 overflow-scroll lg:p-8 rounded-2xl'>
 
-        <div className='flex justify-between items-center mb-6 sticky top-0 py-2 bg-white lg:hidden'>
+        {/* <div className='flex justify-between items-center mb-6 sticky top-0 py-2 bg-white lg:hidden'>
           <button className='w-6'>
             <ArrowLeft />
           </button>
@@ -21,7 +22,9 @@ const RecipeDetails = () => {
           </span>
 
           <span className='w-6'></span>
-        </div>
+        </div> */}
+
+        <PageTop left={<ArrowLeft />} title={'Recipe Details'} right={''} />
 
 
         <div className=''>
