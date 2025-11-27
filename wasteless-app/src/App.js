@@ -21,6 +21,7 @@ import InventoryHomeEmpty from "./pages/InventoryHomeEmpty";
 import Onboarding from "./pages/Onboarding";
 import ItemDetails from "./pages/ItemDetails";
 import TallyScore from "./pages/TallyScore";
+import RecipeDetails from "./pages/RecipeDetails";
 
 
 function App() {
@@ -56,7 +57,7 @@ function App() {
 
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/itemdetails" element={<ItemDetails />} />
-        <Route path="/itemdetails" element={<ItemDetails />} />
+        <Route path="/recipedetails" element={<RecipeDetails />} />
         <Route path="/tallyscore" element={<TallyScore />} />
 
 
