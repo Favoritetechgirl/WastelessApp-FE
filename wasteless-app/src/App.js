@@ -18,6 +18,10 @@ import RecipesEmpty from "./pages/RecipesEmpty";
 import RecipeSearchNotFound from "./pages/RecipeSearchNotFound";
 import ImpactEmpty from "./pages/ImpactEmpty";
 import InventoryHomeEmpty from "./pages/InventoryHomeEmpty";
+import Onboarding from "./pages/Onboarding";
+import ItemDetails from "./pages/ItemDetails";
+import TallyScore from "./pages/TallyScore";
+import RecipeDetails from "./pages/RecipeDetails";
 
 
 function App() {
@@ -26,14 +30,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/recipesempty" element={<RecipesEmpty />} />
-        <Route path="/recipenotfound" element={<RecipeSearchNotFound />} />
-        <Route path="/impactempty" element={<ImpactEmpty />} />
-        <Route path="/inventoryempty" element={<InventoryHomeEmpty />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
         <Route path="/resetsuccess" element={<ResetSuccess />} />
         <Route path="/checkemail" element={<CheckEmail />} />
+        <Route path="/recipesempty" element={<RecipesEmpty />} />
+        <Route path="/recipenotfound" element={<RecipeSearchNotFound />} />
+        <Route path="/impactempty" element={<ImpactEmpty />} />
+        <Route path="/inventoryempty" element={<InventoryHomeEmpty />} />
         <Route path="/splashscreen" element={<SplashScreen />} />
         <Route path="/impactdashboard" element={<ImpactDashboard />} />
         <Route path="/inventorysafe" element={<InventoryHomeSafe />} />
@@ -47,6 +51,15 @@ function App() {
         
         
         <Route path="/settings" element={<Settings />} /> */}
+
+
+        {/* Routes by Philips */}
+
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/itemdetails" element={<ItemDetails />} />
+        <Route path="/recipedetails" element={<RecipeDetails />} />
+        <Route path="/tallyscore" element={<TallyScore />} />
+
 
       </Routes>
     </Router>
