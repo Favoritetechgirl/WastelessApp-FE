@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { X } from 'lucide-react'
 import * as RadioGroup from '@radix-ui/react-radio-group'
+import MainButton from './modals/MainButton';
+import ViceButton from './modals/ViceButton';
 
 const SortAndFilter = () => {
 
@@ -40,7 +42,7 @@ const SortAndFilter = () => {
 
 
   return (
-    <div className='w-screen lg:h-screen border-4 border-green-500 lg:flex items-center bg-gray-200'>
+    <div className='w-screen lg:h-screen lg:flex items-center bg-gray-200'>
 
       <div className='flex items-center justify-between p-3 py-4 sticky top-0 bg-white lg:hidden'>
         <span></span>
@@ -242,13 +244,9 @@ const SortAndFilter = () => {
         </div>
 
         <div className='h-20 w-full mb-12 mt-5 lg:mb-0 flex items-center justify-between p-3'>
-          <button className='py-4 px-10 bg-gray-200 rounded-4xl hidden lg:flex'>
-            Cancel
-          </button>
+          <ViceButton text='Cancel' />
 
-          <button className='bg-green-500 text-white py-3 px-10 rounded-4xl flex-1 lg:flex-0'>
-            Apply
-          </button>
+          <MainButton text='Apply' />
         </div>
       </div>
 

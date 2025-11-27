@@ -1,5 +1,5 @@
 import React from 'react'
-import image_assets from '../assets/images/images'
+import image_assets from '../../assets/images/images'
 
 
 const DeleteModal = () => {
