@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SplashScreen from "./pages/SplashScreen";
@@ -24,6 +26,7 @@ import TallyScore from "./pages/TallyScore";
 import RecipeDetails from "./pages/RecipeDetails";
 import FirstModal from "./components/modals/FirstModal";
 import SortAndFilter from "./components/SortAndFilter";
+import DesktopNav from "./components/DesktopNav";
 
 
 function App() {
@@ -63,6 +66,7 @@ function App() {
         <Route path="/tallyscore" element={<TallyScore />} />
         <Route path="/sort" element={<SortAndFilter />} />
         <Route path="/first" element={<FirstModal />} />
+        <Route path="/dnav" element={<DesktopNav />} />
 
 
       </Routes>
