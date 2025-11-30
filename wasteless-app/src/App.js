@@ -27,13 +27,14 @@ import RecipeDetails from "./pages/RecipeDetails";
 import FirstModal from "./components/modals/FirstModal";
 import SortAndFilter from "./components/SortAndFilter";
 import DesktopNav from "./components/DesktopNav";
+import LandingPage from "./pages/LandingPage";
 
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/resetpassword" element={<ResetPassword />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
