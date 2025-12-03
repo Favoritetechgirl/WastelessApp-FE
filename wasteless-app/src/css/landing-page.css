@@ -1,0 +1,21 @@
+.hero {
+  position: relative;
+  background: url(../assets/images/herobg.png);
+  background-position: center;
+  background-size: cover;
+}
+
+.hero::before {
+  position: absolute;
+  content: '';
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.hero * {
+  z-index: 2;
+  position: relative;
+}
