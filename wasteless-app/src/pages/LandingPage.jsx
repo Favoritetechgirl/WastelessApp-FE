@@ -259,7 +259,7 @@ const LandingPage = () => {
       {/* FOOTER */}
 
       <div className="bg-gradient-to-r from-[#0b5a20] via-[#0fa74d] to-[#11c65f] h-96">
-
+          <p>hi</p>
       </div>
 
     </div>
