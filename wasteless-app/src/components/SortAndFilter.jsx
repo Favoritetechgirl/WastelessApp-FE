@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { X } from 'lucide-react'
 import * as RadioGroup from '@radix-ui/react-radio-group'
-import MainButton from './modals/MainButton';
+import MainButton from './MainButton';
 import ViceButton from './modals/ViceButton';
 
 const SortAndFilter = () => {
