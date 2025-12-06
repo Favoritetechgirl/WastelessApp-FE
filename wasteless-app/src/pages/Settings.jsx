@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import BottomNav from "../components/BottomNav";
 import image_assets from "../assets/images/images";
-import { ArrowLeft, Delete, Eye, Key, Lock, LogOut, Mail, Trash, UserCircle, Check } from "lucide-react";
+import { ArrowLeft, Delete, Eye, Key, Lock, LogOut, Mail, Trash, UserCircle, Check, Info, ChevronRight, File, Shield, Heart } from "lucide-react";
 import PageTop from "../components/PageTop";
 import MainButton from "../components/MainButton";
 
@@ -40,10 +40,14 @@ export default function Settings() {
     }
   }
 
-  const [view, setView] = useState('change-password')
+  const [view, setView] = useState('about')
 
   return (
     <div className="min-h-screen bg-white pb-28 p-2">
+
+      {/* MOBILE SCREEN */}
+      {/* MOBILE SCREEN */}
+      {/* MOBILE SCREEN */}
       {
         view == 'settings' ? (
           <>
@@ -223,6 +227,55 @@ export default function Settings() {
 
 
                 </div>
+
+
+              </div>
+            </div>
+          </>
+        ) : view == 'about' ? (
+          <>
+            <PageTop left={<ArrowLeft />} title={'About'} right="" />
+
+            <div className="my-5 p-3 text-gray-700">
+              <p className="mb-4">We empower you to become a true Climate and Food Hero by transforming your kitchen into an organized HQ. Our app tracks your inventory, sends Critical Alerts for expiring ingredients, and suggests smart recipes to ensure every item fulfils its delicious purpose.
+              </p>
+
+              <p>Together, we can rescue food heroes, maximize kitchen efficiency, and create a world where every meal is a victory against waste.</p>
+
+
+              <div className="my-8">
+
+                <div className="flex justify-between items-center gap-5 w-full mb-6">
+                  <Info />
+                  <div className="flex-1 text-start">Version</div>
+                  <span>1.0.1</span>
+                </div>
+
+
+                <div className="flex justify-between items-center gap-5 w-full mb-8">
+                  <File />
+                  <div className="flex-1 text-start">Terms of Service</div>
+                  <ChevronRight />
+                </div>
+
+
+
+                <div className="flex justify-between items-center gap-5 w-full mb-8">
+                  <Shield />
+                  <div className="flex-1 text-start">Privacy Policy</div>
+                  <ChevronRight />
+                </div>
+
+
+
+                <div className="flex justify-between items-center gap-5 w-full mb-8">
+                  <Heart />
+                  <div className="flex-1 text-start">Credits</div>
+                  <ChevronRight />
+                </div>
+
+
+
 
 
               </div>
