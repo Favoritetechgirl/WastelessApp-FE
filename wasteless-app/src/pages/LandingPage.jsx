@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import image_assets from '../assets/images/images'
-import { Bookmark, Menu, X } from 'lucide-react'
+import { Bookmark, Mail, Menu, Phone, PhoneCall, X, LocateIcon, Locate, LocateFixed, PinIcon, Pin, MapPin } from 'lucide-react'
 import { Boxes, Utensils, AlarmClock, BarChart3 } from "lucide-react";
 import { Camera, Soup, AlertTriangle, ChefHat } from "lucide-react";
 
@@ -61,8 +61,8 @@ const LandingPage = () => {
     <div className='max-w-[1400px] mx-auto bg-green-100'>
       {/* NAVBAR */}
       <div className='font-semibold bg-white'>
-        <div className='nav h-24 border-2 border-green-700 flex justify-between items-center p-3'>
-          <div>
+        <div className='nav h-24 flex justify-between items-center p-3'>
+          <div className='flex items-center'>
             <img src={image_assets.Logo} alt="" />
           </div>
 
@@ -73,12 +73,12 @@ const LandingPage = () => {
           </div>
 
           <div className='hidden lg:flex gap-4'>
-            <button className='bg-green-500 text-white p-3 px-8 border-2 border-green-500 rounded-md hover:bg-transparent hover:text-green-500 transition'>Sign Up</button>
+            <button className='bg-green-500 text-white p-3 px-8 rounded-md hover:bg-transparent hover:text-green-500 transition'>Sign Up</button>
 
             <button className='p-3 px-10 border-2 border-green-500 rounded-md transition hover:bg-green-500 hover:text-white'>Login</button>
           </div>
 
-          <div className='lg:hidden'>
+          <div className='lg:hidden flex items-center'>
             <button onClick={() => setActiveNav((prev) => !prev)}>
               {
                 activeNav ? <X /> : <Menu />
@@ -245,7 +245,7 @@ const LandingPage = () => {
 
       {/* CALL TO ACTION */}
 
-      <div className='bg-white p-14 text-center w-11/12 mx-auto rounded-lg'>
+      <div className='bg-white p-14 text-center w-11/12 mx-auto rounded-lg mb-24'>
 
         <p className='text-3xl font-semibold mb-4'>Join the Movement. Start Saving Today</p>
 
@@ -258,8 +258,58 @@ const LandingPage = () => {
 
       {/* FOOTER */}
 
-      <div className="bg-gradient-to-r from-[#0b5a20] via-[#0fa74d] to-[#11c65f] h-96">
-          <p>hi</p>
+      <div className="bg-gradient-to-r from-[#0b5a20] via-[#0fa74d] to-[#11c65f] lg:h-96 p-12 py-16">
+
+        <div className='lg:flex items-start justify-start'>
+          <div className='flex-[1.5] mb-10'>
+            <img className='w-10/12 max-w-64' src={image_assets.Logo_White} alt="" />
+          </div>
+
+          <div className='flex-1 mb-10'>
+            <p className='text-lg text-white font-semibold mb-3'>Quick Links</p>
+
+            <a href="" className='text-gray-200 block mb-2'>About</a>
+            <a href="" className='text-gray-200 block mb-2'>Pilicy</a>
+            <a href="" className='text-gray-200 block mb-2'>Terms of Use</a>
+            <a href="" className='text-gray-200 block mb-2'>Contack</a>
+            <a href="" className='text-gray-200 block mb-2'>Career</a>
+          </div>
+
+
+          <div className='flex-1 mb-10'>
+            <p className='text-lg text-white font-semibold mb-3'>Get in Touch</p>
+
+            <a href="" className='flex text-gray-200 mb-2 gap-3 items-center'><Phone size={20} /> +234 81 848 8484</a>
+            <a href="" className='flex text-gray-200 mb-2 gap-3 items-center'><Mail size={20} />contact@wasteless.com</a>
+            <a href="" className='flex text-gray-200 mb-2 gap-3 items-center'><MapPin size={20} />24, Utopia, Earth</a>
+
+          </div>
+
+
+          <div className='flex-[1.2] mb-8'>
+            <p className='text-lg text-white font-semibold mb-3'>Subscribe to our Newsletter</p>
+
+            <p className='text-gray-200 mb-4'>Get the latest updates, insights, and exclusive news delivered to your inbox!</p>
+
+            <div className='flex rounded-lg'>
+              <input className='flex-1 outline-none p-2 rounded-l-lg' type="text" />
+              <button className='p-3 px-10 bg-green-900 text-white rounded-r-lg'>Send</button>
+            </div>
+          </div>
+
+        </div>
+
+
+        <div className='text-center lg:flex lg:justify-evenly'>
+          <p className='text-white text-sm mb-4'>©️ WasteLess 2025, All Rights Reserved</p>
+
+          <div className='flex gap-5 justify-center'>
+            <a href="" className='text-sm text-gray-200'>Terms of Use</a>
+            <a href="" className='text-sm text-gray-200'>Privacy Policy</a>
+          </div>
+
+
+        </div>
       </div>
 
     </div>

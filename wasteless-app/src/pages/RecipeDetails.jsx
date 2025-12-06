@@ -1,6 +1,6 @@
 import React from 'react'
 import { ArrowRight, ArrowLeft, Clock, TicketCheck, CheckCircle } from 'lucide-react'
-import PageTop from '../components/modals/PageTop'
+import PageTop from '../components/PageTop'
 
 
 const RecipeDetails = () => {

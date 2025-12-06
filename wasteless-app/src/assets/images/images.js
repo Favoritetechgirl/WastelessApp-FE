@@ -5,6 +5,7 @@ import bin from './bin.png'
 import Logo from './Logo.png'
 import dp from './korty.png'
 import herobg from './herobg.png'
+import Logo_White from './Logo_White.png'
 
 
 const image_assets = {
@@ -13,6 +14,7 @@ const image_assets = {
   onboard_4,
   bin,
   Logo,
+  Logo_White,
   dp,
   herobg
 }
