@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ArrowLeft, Calendar, Camera, ChevronDown, ChevronRightIcon, Minus, Plus } from 'lucide-react'
+import { ArrowLeft, Camera, ChevronDown, ChevronRightIcon, Minus, Plus } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { inventoryService } from '../services'
