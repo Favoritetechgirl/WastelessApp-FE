@@ -15,6 +15,7 @@ export default function Notifications() {
         if (user?.userId) {
             fetchNotifications();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const fetchNotifications = async () => {

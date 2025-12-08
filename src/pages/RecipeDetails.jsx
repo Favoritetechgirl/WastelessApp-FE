@@ -11,7 +11,7 @@ const RecipeDetails = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
-  const [recipe, setRecipe] = useState(location.state?.recipe || null)
+  const [recipe] = useState(location.state?.recipe || null)
   const [loading, setLoading] = useState(false)
 
   const handleMarkAsCooked = async () => {

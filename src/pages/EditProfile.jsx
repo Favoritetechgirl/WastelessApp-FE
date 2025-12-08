@@ -5,7 +5,6 @@ import authService from "../services/authService";
 
 export default function EditProfile() {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [profilePictureBase64, setProfilePictureBase64] = useState(null);
     const [formData, setFormData] = useState({

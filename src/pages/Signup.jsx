@@ -74,7 +74,7 @@ const Signup = () => {
                 password: formData.password
             };
 
-            const response = await authService.register(userData);
+            await authService.register(userData);
 
             toast.success("Registration successful! Let's set up your account.");
 

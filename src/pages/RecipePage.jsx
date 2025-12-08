@@ -39,6 +39,7 @@ export default function Recipe() {
         if (user?.userId) {
             fetchInventory();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const fetchInventory = async () => {
