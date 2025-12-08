@@ -23,24 +23,24 @@ export default function Settings() {
   }
 
   const checkPassword = (password) => {
-    if (password.includes(Number)) {
-      setCrit((prev) => ({ ...prev, one_num: true }))
-    }
 
-    if (password.includes('Caps')) {
-      setCrit((prev) => ({ ...prev, one_upper: true }))
-    }
+    const hasNumber = /[0-9]/.test(password);
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const hasLength = password.length >= 8;
 
-    if (password.includes('specials')) {
-      setCrit((prev) => ({ ...prev, one_speacial: true }))
-    }
+    setCrit({
+      one_num: hasNumber,
+      one_upper: hasUppercase,
+      one_special: hasSpecial,
+      eight_char: hasLength,
+    });
 
-    if (password.length >= 8) {
-      setCrit((prev) => ({ ...prev, eight_char: true }))
-    }
-  }
 
-  const [view, setView] = useState('about')
+  };
+
+  // possible values - settings, edit-profile, change-password, about
+  const [view, setView] = useState('settings')
 
   return (
     <div className="min-h-screen bg-white pb-28 p-2">
@@ -65,16 +65,20 @@ export default function Settings() {
 
               {/* Menu */}
               <div className="space-y-6 mt-4">
-                <div className="flex justify-between">
+
+                <div onClick={() => setView('edit-profile')} className="flex justify-between">
                   <span>Edit Profile</span> <span>›</span>
                 </div>
-                <div className="flex justify-between">
+
+                <div onClick={() => setView('change-password')} className="flex justify-between">
                   <span>Change Password</span> <span>›</span>
                 </div>
+
                 <div className="flex justify-between">
                   <span>Notification Settings</span> <span>›</span>
                 </div>
-                <div className="flex justify-between">
+
+                <div onClick={() => setView('about')} className="flex justify-between">
                   <span>About</span> <span>›</span>
                 </div>
               </div>
@@ -94,7 +98,7 @@ export default function Settings() {
           </>
         ) : view == 'edit-profile' ? (
           <>
-            <PageTop left={<ArrowLeft />} title={'Edit Profile'} right="" />
+            <PageTop left={<ArrowLeft onClick={() => setView('settings')} />} title={'Edit Profile'} right="" />
 
             <div className="p-3">
 
@@ -154,7 +158,7 @@ export default function Settings() {
           </>
         ) : view == 'change-password' ? (
           <>
-            <PageTop left={<ArrowLeft />} title={'Change Password'} />
+            <PageTop left={<ArrowLeft onClick={() => setView('settings')} />} title={'Change Password'} />
 
             <div className="p-3">
               <p className="text-3xl font-semibold mb-4">Update Your Defense Credentials</p>
