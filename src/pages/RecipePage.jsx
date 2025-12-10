@@ -8,10 +8,10 @@ import { recipeService, inventoryService } from "../services";
 function RecipeCard({ recipe, onClick }) {
     return (
         <div
-            className="bg-white rounded-xl p-3 shadow-sm flex gap-3 items-center cursor-pointer hover:shadow-md transition-shadow"
+            className="bg-surface-bg rounded-wasteless-lg p-4 shadow-wasteless flex gap-4 items-center cursor-pointer hover:shadow-wasteless-md transition-all hover:scale-[1.02]"
             onClick={onClick}
         >
-            <div className="w-24 h-20 rounded-md overflow-hidden bg-gray-100">
+            <div className="w-24 h-20 rounded-wasteless overflow-hidden bg-surface-accent">
                 <img
                     src={recipe.image || "/assets/recipe1.jpg"}
                     alt={recipe.title}
@@ -19,8 +19,8 @@ function RecipeCard({ recipe, onClick }) {
                 />
             </div>
             <div className="flex-1">
-                <h3 className="font-semibold">{recipe.title}</h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <h3 className="font-poppins font-medium text-mobile-h3 text-slate-500">{recipe.title}</h3>
+                <p className="text-mobile-caption font-inter text-utility-text mt-1">
                     {recipe.usedIngredientCount} ingredients match • Ready in {recipe.readyInMinutes} min
                 </p>
             </div>
@@ -81,10 +81,10 @@ export default function Recipe() {
     };
 
     return (
-        <div className="min-h-screen bg-white pb-28 px-5">
+        <div className="min-h-screen bg-surface-bg pb-28 px-5">
             <div className="pt-6 pb-4">
-                <h1 className="text-xl font-semibold">Recipes</h1>
-                <p className="text-sm text-gray-500 mt-1">Find recipes using what you already have</p>
+                <h1 className="text-mobile-h2 md:text-desktop-h2 font-poppins font-medium text-slate-500">Recipes</h1>
+                <p className="text-mobile-body-sm md:text-desktop-body-sm font-inter text-utility-text mt-1">Find recipes using what you already have</p>
             </div>
 
             {recipes.length > 0 ? (
@@ -99,8 +99,8 @@ export default function Recipe() {
                 </div>
             ) : (
                 <div className="space-y-3 text-center py-8">
-                    <p className="text-gray-500">No recipes loaded yet</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-mobile-body font-inter text-slate-500">No recipes loaded yet</p>
+                    <p className="text-mobile-body-sm font-inter text-utility-text">
                         {inventoryItems.length > 0
                             ? `You have ${inventoryItems.length} items in your inventory`
                             : "Add items to your inventory first"}
@@ -109,17 +109,18 @@ export default function Recipe() {
             )}
 
             <div className="mt-6">
-                <div
-                    className="bg-green-700 text-white p-5 rounded-xl cursor-pointer hover:bg-green-800 transition-colors"
+                <button
+                    className="w-full bg-gradient-to-br from-brand-700 to-brand-800 text-white p-6 rounded-wasteless-lg cursor-pointer hover:from-brand-800 hover:to-brand-900 transition-all shadow-wasteless hover:shadow-wasteless-md disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleFindRecipes}
+                    disabled={loading}
                 >
-                    <p className="text-lg font-bold">
+                    <p className="text-mobile-h3 md:text-desktop-h3 font-poppins font-medium">
                         {loading ? "Finding Recipes..." : "Use What's Open"}
                     </p>
-                    <p className="text-sm mt-1">
+                    <p className="text-mobile-body-sm md:text-desktop-body-sm font-inter mt-2 text-white/90">
                         See meals you can make with your current ingredients.
                     </p>
-                </div>
+                </button>
             </div>
 
             <BottomNav />

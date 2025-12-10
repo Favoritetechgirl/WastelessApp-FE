@@ -9,6 +9,8 @@ const impactService = {
    */
   getSummary: async (userId, period = 'month') => {
     try {
+      console.log('[impactService] getSummary called with:', { userId, period });
+
       // Backend uses auth context, no userId in path needed
       // period parameter mapping: 'week', 'month', 'year', 'all'
       let endpoint = '/impact/summary';
@@ -25,10 +27,13 @@ const impactService = {
         endpoint = '/impact/summary/30days';
       }
 
+      console.log('[impactService] Making GET request to:', endpoint);
       const response = await api.get(endpoint);
+      console.log('[impactService] Response received:', response.data);
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message;
+      console.error('[impactService] Error occurred:', error);
+      throw error;
     }
   },
 

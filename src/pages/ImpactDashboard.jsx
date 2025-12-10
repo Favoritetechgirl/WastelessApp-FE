@@ -16,19 +16,41 @@ export default function ImpactDashboard() {
         co2Saved: 0
     });
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [selectedPeriod, setSelectedPeriod] = useState('month'); // week, month, year, all
 
     useEffect(() => {
+        console.log('[ImpactDashboard] useEffect triggered, user:', user);
         if (user?.userId) {
             fetchImpactData();
+        } else {
+            console.log('[ImpactDashboard] No user or userId, stopping loading');
+            setLoading(false);
+            setError('User not authenticated');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, selectedPeriod]);
 
     const fetchImpactData = async () => {
+        console.log('[ImpactDashboard] fetchImpactData started');
         setLoading(true);
+        setError(null);
+
+        // Add a timeout safeguard
+        const timeoutId = setTimeout(() => {
+            console.error('[ImpactDashboard] Request timeout after 15 seconds');
+            setLoading(false);
+            setError("Request timed out. Please check if the backend is running.");
+            toast.error("Request timed out");
+        }, 15000);
+
         try {
+            console.log('[ImpactDashboard] Calling impactService.getSummary with:', { userId: user.userId, selectedPeriod });
             const data = await impactService.getSummary(user.userId, selectedPeriod);
+            console.log('[ImpactDashboard] Data received:', data);
+
+            clearTimeout(timeoutId); // Clear timeout if request succeeds
+
             setImpactData({
                 totalItems: data.totalItems || 0,
                 itemsEaten: data.itemsEaten || data.itemsSaved || 0,
@@ -36,10 +58,30 @@ export default function ImpactDashboard() {
                 moneySaved: data.moneySaved || 0,
                 co2Saved: data.co2Saved || 0
             });
+            console.log('[ImpactDashboard] Impact data set successfully');
         } catch (error) {
-            console.error("Failed to fetch impact data:", error);
-            toast.error("Failed to load impact data");
+            clearTimeout(timeoutId); // Clear timeout if request fails
+            console.error("[ImpactDashboard] Failed to fetch impact data:", error);
+
+            // Check if it's a network error (backend not running)
+            if (!error.response || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+                const errorMsg = "Cannot connect to backend server. Please ensure the backend is running on port 8080.";
+                setError(errorMsg);
+                toast.error("Backend server not available");
+                console.error('[ImpactDashboard]', errorMsg);
+            } else if (error.response?.status === 401 || error.response?.status === 403) {
+                const errorMsg = "Authentication failed. Please login again.";
+                setError(errorMsg);
+                toast.error("Authentication error");
+                console.error('[ImpactDashboard]', errorMsg);
+            } else {
+                const errorMsg = error.response?.data?.message || "Failed to load impact data";
+                setError(errorMsg);
+                toast.error(errorMsg);
+                console.error('[ImpactDashboard]', errorMsg);
+            }
         } finally {
+            console.log('[ImpactDashboard] Setting loading to false');
             setLoading(false);
         }
     };
@@ -50,8 +92,29 @@ export default function ImpactDashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-white pb-28 p-4 flex items-center justify-center">
-                <p className="text-gray-500">Loading impact data...</p>
+            <div className="min-h-screen bg-surface-bg pb-28 p-4 flex items-center justify-center">
+                <p className="text-utility-text font-inter text-mobile-body">Loading impact data...</p>
+            </div>
+        );
+    }
+
+    // Show error state if backend connection failed
+    if (error) {
+        return (
+            <div className="min-h-screen bg-surface-bg pb-28 p-4">
+                <h1 className="font-poppins font-medium text-mobile-h1 mb-4 text-slate-500">Impact</h1>
+                <div className="flex flex-col items-center justify-center mt-20 px-6">
+                    <div className="text-6xl mb-4">⚠️</div>
+                    <h2 className="text-mobile-h2 font-poppins font-medium text-slate-500 mb-2">Connection Error</h2>
+                    <p className="text-utility-text font-inter text-center text-mobile-body-sm mb-6">{error}</p>
+                    <button
+                        onClick={() => fetchImpactData()}
+                        className="bg-brand-500 text-white px-6 py-2 rounded-wasteless hover:bg-brand-600 transition-all font-poppins font-medium shadow-sm hover:shadow-md"
+                    >
+                        Try Again
+                    </button>
+                </div>
+                <BottomNav />
             </div>
         );
     }
@@ -62,47 +125,47 @@ export default function ImpactDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-white pb-28 p-4">
-            <h1 className="font-semibold text-xl mb-4">Impact</h1>
+        <div className="min-h-screen bg-surface-bg pb-28 p-4">
+            <h1 className="font-poppins font-medium text-mobile-h1 mb-4 text-slate-500">Impact</h1>
 
             {/* Period Tabs */}
             <div className="flex gap-2 mb-6 overflow-x-auto">
                 <button
                     onClick={() => handlePeriodChange('week')}
-                    className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                    className={`px-4 py-2 rounded-wasteless-sm whitespace-nowrap transition-all font-poppins font-medium text-mobile-caption ${
                         selectedPeriod === 'week'
-                            ? 'bg-green-600 text-white font-medium'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-brand-500 text-white shadow-sm'
+                            : 'bg-surface-accent text-utility-text hover:bg-utility-border'
                     }`}
                 >
                     This Week
                 </button>
                 <button
                     onClick={() => handlePeriodChange('month')}
-                    className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                    className={`px-4 py-2 rounded-wasteless-sm whitespace-nowrap transition-all font-poppins font-medium text-mobile-caption ${
                         selectedPeriod === 'month'
-                            ? 'bg-green-600 text-white font-medium'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-brand-500 text-white shadow-sm'
+                            : 'bg-surface-accent text-utility-text hover:bg-utility-border'
                     }`}
                 >
                     This Month
                 </button>
                 <button
                     onClick={() => handlePeriodChange('year')}
-                    className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                    className={`px-4 py-2 rounded-wasteless-sm whitespace-nowrap transition-all font-poppins font-medium text-mobile-caption ${
                         selectedPeriod === 'year'
-                            ? 'bg-green-600 text-white font-medium'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-brand-500 text-white shadow-sm'
+                            : 'bg-surface-accent text-utility-text hover:bg-utility-border'
                     }`}
                 >
                     Yearly
                 </button>
                 <button
                     onClick={() => handlePeriodChange('all')}
-                    className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
+                    className={`px-4 py-2 rounded-wasteless-sm whitespace-nowrap transition-all font-poppins font-medium text-mobile-caption ${
                         selectedPeriod === 'all'
-                            ? 'bg-green-600 text-white font-medium'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-brand-500 text-white shadow-sm'
+                            : 'bg-surface-accent text-utility-text hover:bg-utility-border'
                     }`}
                 >
                     All Time
@@ -112,21 +175,21 @@ export default function ImpactDashboard() {
             <div className="space-y-4">
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-3">
-                    <StatCard number={impactData.totalItems.toString()} label="Items Logged" />
-                    <StatCard number={impactData.itemsEaten.toString()} label="Rescued" />
-                    <StatCard number={impactData.itemsWasted.toString()} label="Wasted" />
+                    <StatCard number={impactData.totalItems.toString()} label="Items Tracked" variant="default" />
+                    <StatCard number={impactData.itemsEaten.toString()} label="Food Rescued!" variant="success" />
+                    <StatCard number={impactData.itemsWasted.toString()} label="Items Spoiled" variant="warning" />
                 </div>
 
                 {/* Green Card - Money Saved */}
-                <div className="bg-green-800 text-white p-5 rounded-xl">
-                    <p className="text-2xl font-bold">₦{impactData.moneySaved.toLocaleString()}</p>
-                    <p className="text-sm mt-1">Saved from wastage</p>
+                <div className="bg-gradient-to-br from-brand-700 to-brand-800 text-white p-5 rounded-wasteless shadow-wasteless-lg">
+                    <p className="text-mobile-metric md:text-desktop-metric font-poppins font-bold">₦{impactData.moneySaved.toLocaleString()}</p>
+                    <p className="text-mobile-body-sm font-inter mt-1 opacity-90">Money Saved 💰</p>
                 </div>
 
                 {/* Blue Card - Environmental Impact */}
-                <div className="bg-blue-800 text-white p-5 rounded-xl">
-                    <p className="text-2xl font-bold">{impactData.co2Saved.toFixed(1)} kg CO₂</p>
-                    <p className="text-sm mt-1">Environmental Impact</p>
+                <div className="bg-gradient-to-br from-impact-600 to-impact-700 text-white p-5 rounded-wasteless shadow-wasteless-lg">
+                    <p className="text-mobile-metric md:text-desktop-metric font-poppins font-bold">{impactData.co2Saved.toFixed(1)} kg CO₂</p>
+                    <p className="text-mobile-body-sm font-inter mt-1 opacity-90">CO₂ Impact Prevented 🌍</p>
                 </div>
             </div>
 
