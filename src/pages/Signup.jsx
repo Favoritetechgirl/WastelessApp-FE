@@ -99,18 +99,18 @@ const Signup = () => {
     };
 
     return (
-        <div className="min-h-screen w-full flex flex-col bg-white">
+        <div className="min-h-screen w-full flex flex-col bg-surface-bg">
 
-            {/* HEADER */}
-            <div className="bg-green-900 text-white px-6 pt-12 pb-10 rounded-b-3xl">
-                <button onClick={() => navigate('/')} className="text-white text-2xl mb-6">←</button>
+            {/* HEADER - Using proper brand gradient */}
+            <div className="bg-gradient-to-br from-brand-700 to-brand-800 text-white px-6 pt-12 pb-10 rounded-b-wasteless-xl shadow-wasteless-lg">
+                <button onClick={() => navigate('/')} className="text-white text-2xl mb-6 hover:scale-110 transition-transform">←</button>
 
-                <h1 className="text-3xl font-semibold leading-snug">
+                <h1 className="text-mobile-h1 md:text-desktop-h1 font-poppins font-medium">
                     Be a Climate Hero, <br /> from Your Kitchen.
                 </h1>
 
-                <p className="text-white/80 text-sm mt-2 w-64">
-                    We’ll be the annoying friend who reminds you… in a nice way!
+                <p className="text-white/90 text-mobile-body-sm md:text-desktop-body-sm font-inter mt-2">
+                    We'll be the annoying friend who reminds you… in a nice way!
                 </p>
             </div>
 
@@ -118,136 +118,147 @@ const Signup = () => {
             <form className="px-6 mt-6" onSubmit={handleSubmit}>
 
                 {/* Email */}
-                <label className="text-sm font-medium">Email</label>
-                <div className="flex items-center bg-white border rounded-full mt-1 mb-3 px-4 py-3">
-                    <MdEmail className="text-gray-500 text-xl" />
+                <label className="text-mobile-body-sm md:text-desktop-body-sm font-inter font-medium text-slate-500">Email</label>
+                <div className="flex items-center bg-surface-bg border border-utility-border rounded-wasteless mt-1 mb-3 px-4 py-3 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 transition-all">
+                    <MdEmail className="text-utility-text text-xl" />
                     <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="e.g., hero@email.com"
-                        className="flex-1 ml-3 outline-none text-sm"
+                        className="flex-1 ml-3 outline-none text-mobile-body md:text-desktop-body font-inter placeholder:text-utility-text bg-transparent"
                     />
                 </div>
 
                 {/* First Name */}
-                <label className="text-sm font-medium">First Name</label>
-                <div className="flex items-center border rounded-full mt-1 mb-3 px-4 py-3">
-                    <FaUser className="text-gray-500 text-xl" />
+                <label className="text-mobile-body-sm md:text-desktop-body-sm font-inter font-medium text-slate-500">First Name</label>
+                <div className="flex items-center bg-surface-bg border border-utility-border rounded-wasteless mt-1 mb-3 px-4 py-3 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 transition-all">
+                    <FaUser className="text-utility-text text-xl" />
                     <input
                         type="text"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
                         placeholder="e.g., Nkechi, John, etc."
-                        className="flex-1 ml-3 outline-none text-sm"
+                        className="flex-1 ml-3 outline-none text-mobile-body md:text-desktop-body font-inter placeholder:text-utility-text bg-transparent"
                     />
                 </div>
 
                 {/* Last Name */}
-                <label className="text-sm font-medium">Last Name</label>
-                <div className="flex items-center border rounded-full mt-1 mb-3 px-4 py-3">
-                    <FaUser className="text-gray-500 text-xl" />
+                <label className="text-mobile-body-sm md:text-desktop-body-sm font-inter font-medium text-slate-500">Last Name</label>
+                <div className="flex items-center bg-surface-bg border border-utility-border rounded-wasteless mt-1 mb-3 px-4 py-3 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 transition-all">
+                    <FaUser className="text-utility-text text-xl" />
                     <input
                         type="text"
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
                         placeholder="e.g., Nkechi, John, etc."
-                        className="flex-1 ml-3 outline-none text-sm"
+                        className="flex-1 ml-3 outline-none text-mobile-body md:text-desktop-body font-inter placeholder:text-utility-text bg-transparent"
                     />
                 </div>
 
                 {/* Password */}
-                <label className="text-sm font-medium">Password</label>
-                <div className="flex items-center border rounded-full mt-1 px-4 py-3 relative">
-                    <MdLock className="text-gray-500 text-xl" />
+                <label className="text-mobile-body-sm md:text-desktop-body-sm font-inter font-medium text-slate-500">Password</label>
+                <div className="flex items-center bg-surface-bg border border-utility-border rounded-wasteless mt-1 px-4 py-3 relative focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 transition-all">
+                    <MdLock className="text-utility-text text-xl" />
                     <input
                         type={showPassword ? "text" : "password"}
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
                         placeholder="Enter password"
-                        className="flex-1 ml-3 outline-none text-sm"
+                        className="flex-1 ml-3 outline-none text-mobile-body md:text-desktop-body font-inter placeholder:text-utility-text bg-transparent"
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="text-xs absolute right-4 top-3 cursor-pointer"
+                        className="text-mobile-caption md:text-desktop-caption absolute right-4 top-4 cursor-pointer hover:scale-110 transition-transform"
                     >
                         {showPassword ? "🙈" : "👁"}
                     </button>
                 </div>
 
                 {/* Re-enter Password */}
-                <label className="text-sm font-medium mt-3">Re-enter Password</label>
-                <div className="flex items-center border rounded-full mt-1 px-4 py-3 relative">
-                    <MdLock className="text-gray-500 text-xl" />
+                <label className="text-mobile-body-sm md:text-desktop-body-sm font-inter font-medium text-slate-500 block mt-3">Re-enter Password</label>
+                <div className="flex items-center bg-surface-bg border border-utility-border rounded-wasteless mt-1 px-4 py-3 relative focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-100 transition-all">
+                    <MdLock className="text-utility-text text-xl" />
                     <input
                         type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         placeholder="Re-Enter password"
-                        className="flex-1 ml-3 outline-none text-sm"
+                        className="flex-1 ml-3 outline-none text-mobile-body md:text-desktop-body font-inter placeholder:text-utility-text bg-transparent"
                     />
                     <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="text-xs absolute right-4 top-3 cursor-pointer"
+                        className="text-mobile-caption md:text-desktop-caption absolute right-4 top-4 cursor-pointer hover:scale-110 transition-transform"
                     >
                         {showConfirmPassword ? "🙈" : "👁"}
                     </button>
                 </div>
 
-                {/* Password Rules */}
-                <ul className="text-xs mt-3 space-y-1">
-                    <li className={passwordValidation.hasNumber ? "text-green-600" : "text-gray-400"}>
-                        {passwordValidation.hasNumber ? "✔" : "○"} At least one number
-                    </li>
-                    <li className={passwordValidation.hasMinLength ? "text-green-600" : "text-gray-400"}>
-                        {passwordValidation.hasMinLength ? "✔" : "○"} At least eight characters
-                    </li>
-                    <li className={passwordValidation.hasUppercase ? "text-green-600" : "text-gray-400"}>
-                        {passwordValidation.hasUppercase ? "✔" : "○"} At least one uppercase letter
-                    </li>
-                    <li className={passwordValidation.hasSpecialChar ? "text-green-600" : "text-gray-400"}>
-                        {passwordValidation.hasSpecialChar ? "✔" : "○"} At least one special character
-                    </li>
-                    <li className={passwordValidation.passwordsMatch ? "text-green-600" : "text-gray-400"}>
-                        {passwordValidation.passwordsMatch ? "✔" : "○"} Passwords match
-                    </li>
-                </ul>
+                {/* Password Requirements */}
+                <div className="mt-4 space-y-1">
+                    <p className={`text-mobile-caption md:text-desktop-caption font-inter flex items-center ${passwordValidation.hasNumber ? 'text-brand-500' : 'text-utility-text'}`}>
+                        {passwordValidation.hasNumber ? '✓' : '○'} At least one number
+                    </p>
+                    <p className={`text-mobile-caption md:text-desktop-caption font-inter flex items-center ${passwordValidation.hasMinLength ? 'text-brand-500' : 'text-utility-text'}`}>
+                        {passwordValidation.hasMinLength ? '✓' : '○'} At least eight characters
+                    </p>
+                    <p className={`text-mobile-caption md:text-desktop-caption font-inter flex items-center ${passwordValidation.hasUppercase ? 'text-brand-500' : 'text-utility-text'}`}>
+                        {passwordValidation.hasUppercase ? '✓' : '○'} At least one uppercase letter
+                    </p>
+                    <p className={`text-mobile-caption md:text-desktop-caption font-inter flex items-center ${passwordValidation.hasSpecialChar ? 'text-brand-500' : 'text-utility-text'}`}>
+                        {passwordValidation.hasSpecialChar ? '✓' : '○'} At least one special character
+                    </p>
+                    <p className={`text-mobile-caption md:text-desktop-caption font-inter flex items-center ${passwordValidation.passwordsMatch ? 'text-brand-500' : 'text-utility-text'}`}>
+                        {passwordValidation.passwordsMatch ? '✓' : '○'} Passwords match
+                    </p>
+                </div>
 
-                {/* Create Account */}
+                {/* Submit Button */}
                 <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="w-full bg-green-600 text-white rounded-full py-3 font-semibold mt-5 hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    type="submit"
+                    disabled={loading || !Object.values(passwordValidation).every(v => v)}
+                    className={`w-full py-4 rounded-wasteless mt-6 text-mobile-button md:text-desktop-button font-poppins font-medium transition-all duration-200 ${
+                        loading || !Object.values(passwordValidation).every(v => v)
+                            ? 'bg-utility-border text-utility-text cursor-not-allowed'
+                            : 'bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white shadow-wasteless hover:shadow-wasteless-md'
+                    }`}
                 >
                     {loading ? "Creating account..." : "Create account"}
                 </button>
 
-                <p className="text-center text-xs mt-3">
+                {/* Footer */}
+                <p className="text-center mt-6 text-mobile-body-sm md:text-desktop-body-sm font-inter text-utility-text">
                     Already have an account?{" "}
-                    <Link to="/login" className="text-green-700 font-medium">
+                    <Link to="/login" className="text-brand-500 hover:text-brand-600 font-medium transition-colors">
                         Log in
                     </Link>
                 </p>
 
-                {/* Divider */}
-                <div className="flex items-center my-4">
-                    <span className="flex-1 h-px bg-gray-300"></span>
-                    <span className="px-3 text-xs text-gray-500">Or signup using</span>
-                    <span className="flex-1 h-px bg-gray-300"></span>
+                {/* Social Login Divider */}
+                <div className="flex items-center mt-6 mb-4">
+                    <div className="flex-1 h-px bg-utility-border"></div>
+                    <span className="px-4 text-mobile-caption md:text-desktop-caption font-inter text-utility-text">Or signup using</span>
+                    <div className="flex-1 h-px bg-utility-border"></div>
                 </div>
 
-                {/* Icons */}
-                <div className="flex justify-center gap-6 mb-8">
-                    <FaGoogle className="text-red-500 text-xl" />
-                    <FaApple className="text-black text-xl" />
-                    <FaFacebook className="text-blue-600 text-xl" />
+                {/* Social Login Buttons */}
+                <div className="flex justify-center gap-4">
+                    <button type="button" className="w-12 h-12 rounded-full border border-utility-border flex items-center justify-center hover:border-brand-500 hover:bg-brand-50 transition-all">
+                        <FaGoogle className="text-danger-500 text-xl" />
+                    </button>
+                    <button type="button" className="w-12 h-12 rounded-full border border-utility-border flex items-center justify-center hover:border-brand-500 hover:bg-brand-50 transition-all">
+                        <FaApple className="text-slate-500 text-2xl" />
+                    </button>
+                    <button type="button" className="w-12 h-12 rounded-full border border-utility-border flex items-center justify-center hover:border-brand-500 hover:bg-brand-50 transition-all">
+                        <FaFacebook className="text-impact-500 text-xl" />
+                    </button>
                 </div>
             </form>
         </div>

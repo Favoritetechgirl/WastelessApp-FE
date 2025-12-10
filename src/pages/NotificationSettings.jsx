@@ -1,130 +1,89 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import BottomNav from "../components/BottomNav";
+import authService from "../services/authService";
 
-export default function NotificationSettings() {
+export default function Settings() {
     const navigate = useNavigate();
-    const [settings, setSettings] = useState({
-        expirationAlerts: true,
-        recipeReminders: true,
-        impactUpdates: false,
-        pushNotifications: true,
-        emailNotifications: false,
-    });
+    const [user, setUser] = useState(null);
 
-    const handleToggle = (setting) => {
-        setSettings(prev => ({
-            ...prev,
-            [setting]: !prev[setting]
-        }));
-        toast.success("Notification preferences updated");
+    useEffect(() => {
+        const userData = authService.getStoredUser();
+        setUser(userData);
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await authService.logout();
+            toast.success("Logged out successfully!");
+            navigate("/");
+        } catch (error) {
+            toast.error("Logout failed");
+        }
     };
 
     return (
-        <div className="min-h-screen bg-white pb-8">
-            {/* Header */}
+        <div className="min-h-screen bg-surface-bg pb-28">
+
             <header className="px-5 pt-6 pb-4 flex items-center gap-3">
-                <button onClick={() => navigate(-1)} className="text-2xl">←</button>
-                <h1 className="text-xl font-semibold">Notification Settings</h1>
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-brand-100 flex items-center justify-center">
+                    {user?.profilePicture ? (
+                        <img src={user.profilePicture} alt="avatar"
+                            className="w-full h-full object-cover" />
+                    ) : (
+                        <span className="text-xl font-poppins font-semibold text-brand-600">
+                            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                        </span>
+                    )}
+                </div>
+
+                <div>
+                    <p className="font-poppins font-medium text-slate-500">{user?.fullName || 'User'}</p>
+                    <p className="text-mobile-caption font-inter text-utility-text">{user?.email || 'email@example.com'}</p>
+                </div>
             </header>
 
-            <div className="px-5 mt-6">
-                <p className="text-sm text-gray-600 mb-6">
-                    Manage how you receive notifications from WasteLess
-                </p>
+            <div className="px-5">
 
-                {/* Notification Types */}
-                <div className="space-y-5">
-                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                        <div>
-                            <p className="font-medium">Expiration Alerts</p>
-                            <p className="text-xs text-gray-500 mt-1">Get notified about items nearing expiry</p>
-                        </div>
-                        <label className="relative inline-block w-12 h-6">
-                            <input
-                                type="checkbox"
-                                checked={settings.expirationAlerts}
-                                onChange={() => handleToggle('expirationAlerts')}
-                                className="sr-only peer"
-                            />
-                            <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-green-600 transition-colors cursor-pointer"></div>
-                            <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
-                        </label>
+                {/* Menu */}
+                <div className="space-y-6 mt-4">
+                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors" onClick={() => navigate('/edit-profile')}>
+                        <span className="font-inter text-mobile-body text-slate-500">Edit Profile</span>
+                        <span className="text-utility-text">›</span>
                     </div>
-
-                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                        <div>
-                            <p className="font-medium">Recipe Reminders</p>
-                            <p className="text-xs text-gray-500 mt-1">Suggestions based on your inventory</p>
-                        </div>
-                        <label className="relative inline-block w-12 h-6">
-                            <input
-                                type="checkbox"
-                                checked={settings.recipeReminders}
-                                onChange={() => handleToggle('recipeReminders')}
-                                className="sr-only peer"
-                            />
-                            <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-green-600 transition-colors cursor-pointer"></div>
-                            <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
-                        </label>
+                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors" onClick={() => navigate('/change-password')}>
+                        <span className="font-inter text-mobile-body text-slate-500">Change Password</span>
+                        <span className="text-utility-text">›</span>
                     </div>
-
-                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                        <div>
-                            <p className="font-medium">Impact Updates</p>
-                            <p className="text-xs text-gray-500 mt-1">Weekly summary of your food waste impact</p>
-                        </div>
-                        <label className="relative inline-block w-12 h-6">
-                            <input
-                                type="checkbox"
-                                checked={settings.impactUpdates}
-                                onChange={() => handleToggle('impactUpdates')}
-                                className="sr-only peer"
-                            />
-                            <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-green-600 transition-colors cursor-pointer"></div>
-                            <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
-                        </label>
+                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors" onClick={() => navigate('/notification-settings')}>
+                        <span className="font-inter text-mobile-body text-slate-500">Notification Settings</span>
+                        <span className="text-utility-text">›</span>
                     </div>
-
-                    <div className="mt-8">
-                        <h2 className="font-semibold mb-4">Notification Channels</h2>
+                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors" onClick={() => navigate('/donations')}>
+                        <span className="font-inter text-mobile-body text-slate-500">Donation Centers</span>
+                        <span className="text-utility-text">›</span>
                     </div>
-
-                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                        <div>
-                            <p className="font-medium">Push Notifications</p>
-                            <p className="text-xs text-gray-500 mt-1">Receive notifications on this device</p>
-                        </div>
-                        <label className="relative inline-block w-12 h-6">
-                            <input
-                                type="checkbox"
-                                checked={settings.pushNotifications}
-                                onChange={() => handleToggle('pushNotifications')}
-                                className="sr-only peer"
-                            />
-                            <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-green-600 transition-colors cursor-pointer"></div>
-                            <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
-                        </label>
-                    </div>
-
-                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                        <div>
-                            <p className="font-medium">Email Notifications</p>
-                            <p className="text-xs text-gray-500 mt-1">Receive updates via email</p>
-                        </div>
-                        <label className="relative inline-block w-12 h-6">
-                            <input
-                                type="checkbox"
-                                checked={settings.emailNotifications}
-                                onChange={() => handleToggle('emailNotifications')}
-                                className="sr-only peer"
-                            />
-                            <div className="w-full h-full bg-gray-300 rounded-full peer-checked:bg-green-600 transition-colors cursor-pointer"></div>
-                            <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-6"></div>
-                        </label>
+                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors">
+                        <span className="font-inter text-mobile-body text-slate-500">About</span>
+                        <span className="text-utility-text">›</span>
                     </div>
                 </div>
+
+                {/* Danger zone */}
+                <div className="mt-10 space-y-6">
+                    <div className="flex items-center gap-2 cursor-pointer text-danger-600 hover:text-danger-700 transition-colors" onClick={handleLogout}>
+                        <span>🚪</span> <span className="font-inter text-mobile-body">Logout</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 cursor-pointer text-danger-600 hover:text-danger-700 transition-colors">
+                        <span>🗑</span> <span className="font-inter text-mobile-body">Delete Account</span>
+                    </div>
+                </div>
+
             </div>
+
+            <BottomNav />
         </div>
     );
 }
