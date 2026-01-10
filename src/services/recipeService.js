@@ -18,12 +18,16 @@ const recipeService = {
 
   /**
    * Search recipes by ingredients or name
-   * @param {Object} searchData - { ingredients, query, cuisine, diet, intolerances }
+   * @param {string|Object} searchData - Query string or { ingredients, query, cuisine, diet, intolerances }
    * @returns {Promise} Search results
    */
   searchRecipes: async (searchData) => {
     try {
-      const response = await api.post('/recipes/search', searchData);
+      // Handle both string queries and object params
+      const params = typeof searchData === 'string'
+        ? { query: searchData }
+        : searchData;
+      const response = await api.post('/recipes/search', params);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

@@ -1,17 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useCallback } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { X } from 'lucide-react'
 
 const BarcodeScanner = ({ onScanSuccess, onClose }) => {
-  const scannerRef = useRef(null)
-  const [isScanning, setIsScanning] = useState(false)
+  const html5QrCodeRef = useRef(null)
+  const isScanningRef = useRef(false)
+
+  const stopScanner = useCallback(async () => {
+    if (html5QrCodeRef.current && isScanningRef.current) {
+      try {
+        await html5QrCodeRef.current.stop()
+        isScanningRef.current = false
+      } catch (err) {
+        console.error('Error stopping scanner:', err)
+      }
+    }
+  }, [])
 
   useEffect(() => {
-    let html5QrCode = null
-
     const startScanner = async () => {
       try {
-        html5QrCode = new Html5Qrcode('barcode-reader')
+        html5QrCodeRef.current = new Html5Qrcode('barcode-reader')
 
         const config = {
           fps: 10,
@@ -19,21 +28,21 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
           aspectRatio: 1.0
         }
 
-        await html5QrCode.start(
+        await html5QrCodeRef.current.start(
           { facingMode: 'environment' },
           config,
           (decodedText) => {
             // Successfully scanned
-            html5QrCode.stop().then(() => {
+            stopScanner().then(() => {
               onScanSuccess(decodedText)
-            }).catch(err => console.error('Error stopping scanner:', err))
+            })
           },
-          (errorMessage) => {
+          () => {
             // Scanning failed - ignore this, it happens continuously
           }
         )
 
-        setIsScanning(true)
+        isScanningRef.current = true
       } catch (err) {
         console.error('Error starting scanner:', err)
         alert('Unable to access camera. Please check permissions.')
@@ -44,11 +53,9 @@ const BarcodeScanner = ({ onScanSuccess, onClose }) => {
     startScanner()
 
     return () => {
-      if (html5QrCode && isScanning) {
-        html5QrCode.stop().catch(err => console.error('Error stopping scanner:', err))
-      }
+      stopScanner()
     }
-  }, [])
+  }, [onScanSuccess, onClose, stopScanner])
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex flex-col">

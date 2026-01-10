@@ -142,18 +142,34 @@ const Login = () => {
                     <span className="flex-1 h-px bg-utility-border"></span>
                 </div>
 
-                {/* Icons */}
+                {/* Social Login Icons */}
                 <div className="flex justify-center gap-6 mb-8">
-                    <button type="button" className="hover:scale-110 transition-transform">
+                    <button
+                        type="button"
+                        className="hover:scale-110 transition-transform opacity-50 cursor-not-allowed"
+                        onClick={() => toast.info("Google login coming soon!")}
+                        title="Coming soon"
+                    >
                         <FaGoogle className="text-danger-500 text-xl" />
                     </button>
-                    <button type="button" className="hover:scale-110 transition-transform">
+                    <button
+                        type="button"
+                        className="hover:scale-110 transition-transform opacity-50 cursor-not-allowed"
+                        onClick={() => toast.info("Apple login coming soon!")}
+                        title="Coming soon"
+                    >
                         <FaApple className="text-slate-500 text-xl" />
                     </button>
-                    <button type="button" className="hover:scale-110 transition-transform">
+                    <button
+                        type="button"
+                        className="hover:scale-110 transition-transform opacity-50 cursor-not-allowed"
+                        onClick={() => toast.info("Facebook login coming soon!")}
+                        title="Coming soon"
+                    >
                         <FaFacebook className="text-impact-500 text-xl" />
                     </button>
                 </div>
+                <p className="text-center text-mobile-caption font-inter text-utility-text mb-4">Social login coming soon</p>
             </form>
         </div>
     );

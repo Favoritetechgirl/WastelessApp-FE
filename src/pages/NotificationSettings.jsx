@@ -1,86 +1,186 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { ArrowLeft } from "lucide-react";
+import * as Switch from "@radix-ui/react-switch";
 import BottomNav from "../components/BottomNav";
 import authService from "../services/authService";
 
-export default function Settings() {
+export default function NotificationSettings() {
     const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    const [settings, setSettings] = useState({
+        oneDayBefore: true,
+        threeDaysBefore: true,
+        onExpiry: false,
+        emailNotifications: true,
+        pushNotifications: true,
+    });
 
     useEffect(() => {
-        const userData = authService.getStoredUser();
-        setUser(userData);
+        fetchSettings();
     }, []);
 
-    const handleLogout = async () => {
+    const fetchSettings = async () => {
         try {
-            await authService.logout();
-            toast.success("Logged out successfully!");
-            navigate("/");
+            const data = await authService.getSettings();
+            if (data?.notificationSettings) {
+                setSettings({
+                    oneDayBefore: data.notificationSettings.oneDayBefore ?? true,
+                    threeDaysBefore: data.notificationSettings.threeDaysBefore ?? true,
+                    onExpiry: data.notificationSettings.onExpiry ?? false,
+                    emailNotifications: data.notificationSettings.emailNotifications ?? true,
+                    pushNotifications: data.notificationSettings.pushNotifications ?? true,
+                });
+            }
         } catch (error) {
-            toast.error("Logout failed");
+            console.error("Failed to fetch settings:", error);
+            // Use defaults from state
+        } finally {
+            setLoading(false);
         }
     };
 
+    const toggleSetting = (key) => {
+        setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await authService.updateNotificationSettings(settings);
+            toast.success("Notification settings saved!");
+            navigate(-1);
+        } catch (error) {
+            console.error("Failed to save settings:", error);
+            toast.error("Failed to save settings. Please try again.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-surface-bg flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-surface-bg pb-28">
-
             <header className="px-5 pt-6 pb-4 flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-brand-100 flex items-center justify-center">
-                    {user?.profilePicture ? (
-                        <img src={user.profilePicture} alt="avatar"
-                            className="w-full h-full object-cover" />
-                    ) : (
-                        <span className="text-xl font-poppins font-semibold text-brand-600">
-                            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
-                        </span>
-                    )}
-                </div>
-
-                <div>
-                    <p className="font-poppins font-medium text-slate-500">{user?.fullName || 'User'}</p>
-                    <p className="text-mobile-caption font-inter text-utility-text">{user?.email || 'email@example.com'}</p>
-                </div>
+                <button onClick={() => navigate(-1)} className="p-2 -ml-2">
+                    <ArrowLeft className="w-6 h-6 text-slate-600" />
+                </button>
+                <h1 className="text-xl font-poppins font-semibold text-slate-700">
+                    Notification Settings
+                </h1>
             </header>
 
             <div className="px-5">
+                {/* Expiry Reminders Section */}
+                <div className="mb-8">
+                    <h2 className="text-lg font-semibold text-slate-700 mb-2">Expiry Reminders</h2>
+                    <p className="text-sm text-gray-500 mb-4">When should we remind you about expiring items?</p>
 
-                {/* Menu */}
-                <div className="space-y-6 mt-4">
-                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors" onClick={() => navigate('/edit-profile')}>
-                        <span className="font-inter text-mobile-body text-slate-500">Edit Profile</span>
-                        <span className="text-utility-text">›</span>
-                    </div>
-                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors" onClick={() => navigate('/change-password')}>
-                        <span className="font-inter text-mobile-body text-slate-500">Change Password</span>
-                        <span className="text-utility-text">›</span>
-                    </div>
-                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors" onClick={() => navigate('/notification-settings')}>
-                        <span className="font-inter text-mobile-body text-slate-500">Notification Settings</span>
-                        <span className="text-utility-text">›</span>
-                    </div>
-                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors" onClick={() => navigate('/donations')}>
-                        <span className="font-inter text-mobile-body text-slate-500">Donation Centers</span>
-                        <span className="text-utility-text">›</span>
-                    </div>
-                    <div className="flex justify-between cursor-pointer hover:text-brand-600 transition-colors">
-                        <span className="font-inter text-mobile-body text-slate-500">About</span>
-                        <span className="text-utility-text">›</span>
+                    <div className="space-y-4 bg-white rounded-xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-medium text-slate-700">1 Day Before</p>
+                                <p className="text-sm text-gray-500">Remind about items expiring tomorrow</p>
+                            </div>
+                            <Switch.Root
+                                checked={settings.oneDayBefore}
+                                onCheckedChange={() => toggleSetting('oneDayBefore')}
+                                className="w-11 h-6 rounded-full relative transition-colors bg-gray-300 data-[state=checked]:bg-green-500"
+                            >
+                                <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow-sm transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
+                            </Switch.Root>
+                        </div>
+
+                        <div className="border-t border-gray-100"></div>
+
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-medium text-slate-700">3 Days Before</p>
+                                <p className="text-sm text-gray-500">Early warning for items expiring soon</p>
+                            </div>
+                            <Switch.Root
+                                checked={settings.threeDaysBefore}
+                                onCheckedChange={() => toggleSetting('threeDaysBefore')}
+                                className="w-11 h-6 rounded-full relative transition-colors bg-gray-300 data-[state=checked]:bg-green-500"
+                            >
+                                <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow-sm transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
+                            </Switch.Root>
+                        </div>
+
+                        <div className="border-t border-gray-100"></div>
+
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-medium text-slate-700">On Expiry Day</p>
+                                <p className="text-sm text-gray-500">Final reminder on expiration date</p>
+                            </div>
+                            <Switch.Root
+                                checked={settings.onExpiry}
+                                onCheckedChange={() => toggleSetting('onExpiry')}
+                                className="w-11 h-6 rounded-full relative transition-colors bg-gray-300 data-[state=checked]:bg-green-500"
+                            >
+                                <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow-sm transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
+                            </Switch.Root>
+                        </div>
                     </div>
                 </div>
 
-                {/* Danger zone */}
-                <div className="mt-10 space-y-6">
-                    <div className="flex items-center gap-2 cursor-pointer text-danger-600 hover:text-danger-700 transition-colors" onClick={handleLogout}>
-                        <span>🚪</span> <span className="font-inter text-mobile-body">Logout</span>
-                    </div>
+                {/* Notification Channels Section */}
+                <div className="mb-8">
+                    <h2 className="text-lg font-semibold text-slate-700 mb-2">Notification Channels</h2>
+                    <p className="text-sm text-gray-500 mb-4">How would you like to receive notifications?</p>
 
-                    <div className="flex items-center gap-2 cursor-pointer text-danger-600 hover:text-danger-700 transition-colors">
-                        <span>🗑</span> <span className="font-inter text-mobile-body">Delete Account</span>
+                    <div className="space-y-4 bg-white rounded-xl p-4 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-medium text-slate-700">Email Notifications</p>
+                                <p className="text-sm text-gray-500">Receive reminders via email</p>
+                            </div>
+                            <Switch.Root
+                                checked={settings.emailNotifications}
+                                onCheckedChange={() => toggleSetting('emailNotifications')}
+                                className="w-11 h-6 rounded-full relative transition-colors bg-gray-300 data-[state=checked]:bg-green-500"
+                            >
+                                <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow-sm transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
+                            </Switch.Root>
+                        </div>
+
+                        <div className="border-t border-gray-100"></div>
+
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="font-medium text-slate-700">Push Notifications</p>
+                                <p className="text-sm text-gray-500">Get alerts on your device</p>
+                            </div>
+                            <Switch.Root
+                                checked={settings.pushNotifications}
+                                onCheckedChange={() => toggleSetting('pushNotifications')}
+                                className="w-11 h-6 rounded-full relative transition-colors bg-gray-300 data-[state=checked]:bg-green-500"
+                            >
+                                <Switch.Thumb className="block w-5 h-5 bg-white rounded-full shadow-sm transition-transform translate-x-0.5 data-[state=checked]:translate-x-[22px]" />
+                            </Switch.Root>
+                        </div>
                     </div>
                 </div>
 
+                {/* Save Button */}
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="w-full bg-green-500 text-white py-4 rounded-full font-medium hover:bg-green-600 transition-colors disabled:opacity-50"
+                >
+                    {saving ? "Saving..." : "Save Settings"}
+                </button>
             </div>
 
             <BottomNav />
