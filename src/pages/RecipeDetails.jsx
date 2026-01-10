@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { ArrowRight, ArrowLeft, Clock, TicketCheck, CheckCircle } from 'lucide-react'
-import { useNavigate, useLocation, useParams } from 'react-router-dom'
+import React, { useState } from 'react'
+import { ArrowLeft, Clock, CheckCircle } from 'lucide-react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import PageTop from '../components/modals/PageTop'
 import { useAuth } from '../context/AuthContext'
@@ -11,7 +11,7 @@ const RecipeDetails = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
-  const [recipe, setRecipe] = useState(location.state?.recipe || null)
+  const [recipe] = useState(location.state?.recipe || null)
   const [loading, setLoading] = useState(false)
 
   const handleMarkAsCooked = async () => {

@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react'
-import { ArrowLeft, Calendar, Camera, ChevronDown, ChevronRightIcon, Minus, Plus } from 'lucide-react'
+import { ArrowLeft, Camera, ChevronDown, ChevronRightIcon, Minus, Plus, Scan } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { inventoryService } from '../services'
 import { toast } from 'react-toastify'
+import BarcodeScanner from '../components/BarcodeScanner'
+import openFoodFactsService from '../services/openFoodFactsService'
 
 const ItemEntry = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [showScanner, setShowScanner] = useState(false)
   const fileInputRef = React.useRef(null)
 
   // Check if we're editing an existing item
@@ -157,6 +160,54 @@ const ItemEntry = () => {
     fileInputRef.current?.click()
   }
 
+  const handleBarcodeClick = () => {
+    setShowScanner(true)
+  }
+
+  const handleBarcodeScanned = async (barcode) => {
+    setShowScanner(false)
+    toast.info('Fetching product information...')
+
+    try {
+      const productData = await openFoodFactsService.getProductByBarcode(barcode)
+
+      if (productData.found) {
+        // Auto-fill form with product data
+        const expirationDays = openFoodFactsService.suggestExpirationDays(productData.category)
+        const expirationDate = new Date()
+        expirationDate.setDate(expirationDate.getDate() + expirationDays)
+
+        setFormData(prev => ({
+          ...prev,
+          name: productData.name + (productData.brand ? ` (${productData.brand})` : ''),
+          category: productData.category,
+          storageLocation: openFoodFactsService.suggestStorageLocation(productData.category),
+          expirationDate: expirationDate.toISOString().split('T')[0],
+          daysUntilSpoilage: expirationDays.toString(),
+        }))
+
+        // Fetch image if available
+        if (productData.imageUrl) {
+          try {
+            const response = await fetch(productData.imageUrl)
+            const blob = await response.blob()
+            const file = new File([blob], 'product-image.jpg', { type: 'image/jpeg' })
+            setFormData(prev => ({ ...prev, image: file }))
+          } catch (err) {
+            console.error('Error fetching product image:', err)
+          }
+        }
+
+        toast.success(`Product found: ${productData.name}`)
+      } else {
+        toast.warning('Product not found in database. Please enter details manually.')
+      }
+    } catch (error) {
+      console.error('Error scanning barcode:', error)
+      toast.error('Failed to fetch product information')
+    }
+  }
+
   return (
     <div className='w-screen border-4 border-red-600 lg:flex items-center justify-center bg-gray-200 lg:h-screen'>
 
@@ -226,6 +277,19 @@ const ItemEntry = () => {
               onChange={handleImageCapture}
               className="hidden"
             />
+
+            <div
+              className='one-input rounded-2xl flex items-center px-4 text-sm bg-green-50 border border-green-300 mb-5 cursor-pointer hover:bg-green-100 transition-colors'
+              onClick={handleBarcodeClick}
+            >
+              <div className='flex items-center py-2 w-full'>
+                <Scan size={20} className='mr-3 text-green-600' />
+                <span className='flex-1 text-start text-green-700 font-medium'>
+                  Scan Barcode
+                </span>
+                <ChevronRightIcon className='text-green-600' />
+              </div>
+            </div>
 
             <div className='one-input text-start mb-5'>
               <label className='block mb-2 text-gray-900' htmlFor="">Quantity</label>
@@ -483,6 +547,14 @@ const ItemEntry = () => {
           </button>
         </div>
       </div>
+
+      {/* Barcode Scanner Modal */}
+      {showScanner && (
+        <BarcodeScanner
+          onScanSuccess={handleBarcodeScanned}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
 
     </div>
   )

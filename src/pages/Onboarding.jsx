@@ -11,7 +11,7 @@ const Onboarding = () => {
   const navigate = useNavigate()
   const [onboardingSlide, setOnboardingSlide] = useState(1)
   const [username, setUsername] = useState('')
-  const [profilePicture, setProfilePicture] = useState(null)
+  const [, setProfilePicture] = useState(null)
   const [profilePicturePreview, setProfilePicturePreview] = useState(null)
 
   const [locations, setLocations] = useState({

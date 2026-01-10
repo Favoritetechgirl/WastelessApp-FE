@@ -50,15 +50,15 @@ const ItemDetails = () => {
   }
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this item?')) return
+    if (!window.confirm('Remove this item from your inventory?')) return
 
     try {
       await inventoryService.deleteItem(item.id)
-      toast.success('Item deleted successfully')
+      toast.success('Item removed from inventory')
       navigate('/inventory')
     } catch (error) {
-      console.error('Error deleting item:', error)
-      toast.error('Failed to delete item')
+      console.error('Error removing item:', error)
+      toast.error('Failed to remove item')
     }
   }
 
@@ -66,8 +66,15 @@ const ItemDetails = () => {
     setLoading(true)
     try {
       await impactService.updateItemStatus(item.id, { status })
-      const statusText = status === 'EATEN' ? 'used' : status === 'WASTED' ? 'wasted' : 'donated'
-      toast.success(`Item marked as ${statusText}!`)
+      let message = 'Mission logged!';
+      if (status === 'EATEN') {
+        message = '🎉 Food Rescued! Great job, Climate Hero!';
+      } else if (status === 'WASTED') {
+        message = 'Mission logged. We\'ll help you rescue more next time!';
+      } else if (status === 'DONATED') {
+        message = '💚 Donation logged! You\'re making a difference!';
+      }
+      toast.success(message)
       navigate('/inventory')
     } catch (error) {
       console.error('Error updating status:', error)
@@ -99,22 +106,22 @@ const ItemDetails = () => {
 
   return (
     // THE WHOLE PAGE
-    <div>
+    <div className='min-h-screen bg-surface-bg'>
       {/* Mobile Screen */}
-      <div className='w-screen border-4 border-green-500'>
+      <div className='w-full'>
 
-        <div className='flex items-center justify-between p-3 py-4 sticky top-0 bg-white'>
-          <ArrowLeft className='cursor-pointer' onClick={handleGoBack} />
+        <div className='flex items-center justify-between px-5 py-4 sticky top-0 bg-surface-bg border-b border-utility-border z-10'>
+          <ArrowLeft className='cursor-pointer hover:text-brand-500 transition-colors' onClick={handleGoBack} />
 
-          <span>Item Details</span>
+          <span className='font-poppins font-medium text-mobile-h3 text-slate-500'>Item Details</span>
 
-          <Trash className='text-red-500 cursor-pointer' onClick={handleDelete} />
+          <Trash className='text-danger-500 cursor-pointer hover:text-danger-600 transition-colors' onClick={handleDelete} />
         </div>
 
-        <div className='p-3 text-start'>
+        <div className='px-5 py-4 text-start'>
 
           <img
-            className='border-2 border-gray-300 rounded-2xl w-full h-48 object-cover bg-gray-100'
+            className='border-2 border-utility-border rounded-wasteless w-full h-48 object-cover bg-surface-accent shadow-wasteless'
             src={item.imageUrl || '/assets/placeholder.png'}
             alt={item.name}
             onError={(e) => {
@@ -122,15 +129,15 @@ const ItemDetails = () => {
             }}
           />
 
-          <p className='text-3xl font-semibold my-3'>{item.name}</p>
+          <h1 className='text-mobile-h1 md:text-desktop-h1 font-poppins font-medium text-slate-500 my-4'>{item.name}</h1>
 
-          <div className='flex justify-between text-xs mb-8'>
-            <span className={`p-3 px-5 rounded-3xl ${
+          <div className='flex justify-between items-center mb-6'>
+            <span className={`px-4 py-2 rounded-wasteless-lg font-inter text-mobile-body-sm font-medium ${
               isExpired
-                ? 'bg-red-200 text-red-600'
+                ? 'bg-danger-100 text-danger-600'
                 : isExpiringSoon
-                ? 'bg-orange-100 text-orange-600'
-                : 'bg-green-100 text-green-600'
+                ? 'bg-alert-100 text-alert-600'
+                : 'bg-brand-100 text-brand-600'
             }`}>
               {isExpired
                 ? `Expired ${Math.abs(daysLeft)} days ago`
@@ -138,7 +145,7 @@ const ItemDetails = () => {
             </span>
 
             <button
-              className='flex items-center gap-2 p-3 px-5 border border-gray-300 rounded-3xl hover:bg-gray-50'
+              className='flex items-center gap-2 px-4 py-2 border border-utility-border rounded-wasteless hover:bg-surface-accent transition-colors font-inter text-mobile-body-sm'
               onClick={() => navigate(`/itementry`, { state: { item } })}
             >
               <Pen size={15} />
@@ -146,47 +153,47 @@ const ItemDetails = () => {
             </button>
           </div>
 
-          <div className='py-4 text-sm'>
+          <div className='py-4'>
 
-            <div className='one-detail flex border-b border-gray-300 py-2 mb-2'>
-              <span className='flex-1'>Quantity</span>
-              <span className='flex-2 text-gray-700'>{item.quantity} {item.unit || ''}</span>
+            <div className='flex border-b border-utility-border py-3'>
+              <span className='flex-1 font-inter text-mobile-body-sm text-utility-text'>Quantity</span>
+              <span className='flex-2 font-inter text-mobile-body-sm text-slate-500 font-medium'>{item.quantity} {item.unit || 'pieces'}</span>
             </div>
-            <div className='one-detail flex border-b border-gray-300 py-2 mb-2'>
-              <span className='flex-1'>Category</span>
-              <span className='flex-2 text-gray-700'>{item.category}</span>
+            <div className='flex border-b border-utility-border py-3'>
+              <span className='flex-1 font-inter text-mobile-body-sm text-utility-text'>Category</span>
+              <span className='flex-2 font-inter text-mobile-body-sm text-slate-500 font-medium'>{item.category}</span>
             </div>
-            <div className='one-detail flex border-b border-gray-300 py-2 mb-2'>
-              <span className='flex-1'>Location</span>
-              <span className='flex-2 text-gray-700'>{item.storageLocation || 'N/A'}</span>
+            <div className='flex border-b border-utility-border py-3'>
+              <span className='flex-1 font-inter text-mobile-body-sm text-utility-text'>Location</span>
+              <span className='flex-2 font-inter text-mobile-body-sm text-slate-500 font-medium'>{item.storageLocation || 'N/A'}</span>
             </div>
             {item.estimatedValue && (
-              <div className='one-detail flex border-b border-gray-300 py-2 mb-2'>
-                <span className='flex-1'>Price</span>
-                <span className='flex-2 text-gray-700'>₦{item.estimatedValue.toLocaleString()}</span>
+              <div className='flex border-b border-utility-border py-3'>
+                <span className='flex-1 font-inter text-mobile-body-sm text-utility-text'>Price</span>
+                <span className='flex-2 font-inter text-mobile-body-sm text-slate-500 font-medium'>₦{item.estimatedValue.toLocaleString()}</span>
               </div>
             )}
-            <div className='one-detail flex border-b border-gray-300 py-2 mb-2'>
-              <span className='flex-1'>Purchase Date</span>
-              <span className='flex-2 text-gray-700'>{formatDate(item.purchaseDate)}</span>
+            <div className='flex border-b border-utility-border py-3'>
+              <span className='flex-1 font-inter text-mobile-body-sm text-utility-text'>Purchase Date</span>
+              <span className='flex-2 font-inter text-mobile-body-sm text-slate-500 font-medium'>{formatDate(item.purchaseDate)}</span>
             </div>
-            <div className='one-detail flex border-b border-gray-300 py-2 mb-2'>
-              <span className='flex-1'>Expiry Date</span>
-              <span className='flex-2 text-gray-700'>{formatDate(item.expiryDate || item.expirationDate)}</span>
+            <div className='flex border-b border-utility-border py-3'>
+              <span className='flex-1 font-inter text-mobile-body-sm text-utility-text'>Expiry Date</span>
+              <span className='flex-2 font-inter text-mobile-body-sm text-slate-500 font-medium'>{formatDate(item.expiryDate || item.expirationDate)}</span>
             </div>
 
           </div>
 
           <div className='space-y-3 mb-6'>
             <button
-              className='w-full p-3 border border-gray-300 rounded-3xl hover:bg-gray-50'
+              className='w-full px-6 py-3 border border-utility-border rounded-wasteless hover:bg-surface-accent transition-colors font-poppins font-medium text-mobile-button text-slate-500'
               onClick={handleFindRecipes}
             >
               What can I make?
             </button>
 
             <button
-              className='w-full p-3 border border-green-600 text-green-600 rounded-3xl hover:bg-green-50'
+              className='w-full px-6 py-3 border-2 border-brand-500 text-brand-600 rounded-wasteless hover:bg-brand-50 transition-colors font-poppins font-medium text-mobile-button'
               onClick={() => navigate('/donations')}
             >
               Find Donation Centers
@@ -195,8 +202,8 @@ const ItemDetails = () => {
 
 
           <div className='my-6'>
-            <p className='text-lg'>How was the rescue Mission?</p>
-            <p className='text-sm text-gray-700 mb-3'>Did you use it, waste it, or donate it? Select one outcome below to update the item's status.</p>
+            <p className='text-lg font-poppins font-medium'>How Was the Rescue Mission?</p>
+            <p className='text-sm text-utility-text mb-3 font-inter'>Log what happened to help track your impact and plan better!</p>
 
 
             <RadioGroup.Root
@@ -205,69 +212,69 @@ const ItemDetails = () => {
               onValueChange={setStatus}
             >
 
-              {/* OPTION 1 - Used */}
+              {/* OPTION 1 - Rescued/Used */}
               <label
                 htmlFor="r1"
-                className="flex items-center gap py-4 justify-between cursor-pointer border-b border-gray-300"
+                className="flex items-center gap py-4 justify-between cursor-pointer border-b border-utility-border hover:bg-brand-50 px-2 rounded-wasteless-sm transition-colors"
               >
                 <div>
-                  <span className="text-sm font-medium">Used it! ✅</span>
-                  <p className="text-xs text-gray-500">I consumed or cooked with this item</p>
+                  <span className="text-sm font-medium font-poppins text-brand-600">Food Rescued! ✅</span>
+                  <p className="text-xs text-utility-text font-inter">I consumed or cooked with this item</p>
                 </div>
 
                 <RadioGroup.Item
                   value="EATEN"
                   id="r1"
-                  className="w-5 h-5 rounded-full border border-gray-400
-                     data-[state=checked]:border-green-400
-                     data-[state=checked]:bg-green-100
+                  className="w-5 h-5 rounded-full border border-utility-border
+                     data-[state=checked]:border-brand-500
+                     data-[state=checked]:bg-brand-100
                      flex items-center justify-center"
                 >
-                  <RadioGroup.Indicator className="w-3 h-3 rounded-full bg-green-400" />
+                  <RadioGroup.Indicator className="w-3 h-3 rounded-full bg-brand-500" />
                 </RadioGroup.Item>
               </label>
 
-              {/* OPTION 2 - Wasted */}
+              {/* OPTION 2 - Item Spoiled */}
               <label
                 htmlFor="r2"
-                className="flex items-center gap py-4 justify-between cursor-pointer border-b border-gray-300"
+                className="flex items-center gap py-4 justify-between cursor-pointer border-b border-utility-border hover:bg-danger-50 px-2 rounded-wasteless-sm transition-colors"
               >
                 <div>
-                  <span className="text-sm font-medium">Wasted it 😔</span>
-                  <p className="text-xs text-gray-500">Unfortunately, it went bad</p>
+                  <span className="text-sm font-medium font-poppins text-danger-600">Item Spoiled</span>
+                  <p className="text-xs text-utility-text font-inter">It went bad before I could use it</p>
                 </div>
 
                 <RadioGroup.Item
                   value="WASTED"
                   id="r2"
-                  className="w-5 h-5 rounded-full border border-gray-400
-                     data-[state=checked]:border-green-400
-                     data-[state=checked]:bg-green-100
+                  className="w-5 h-5 rounded-full border border-utility-border
+                     data-[state=checked]:border-danger-500
+                     data-[state=checked]:bg-danger-100
                      flex items-center justify-center"
                 >
-                  <RadioGroup.Indicator className="w-3 h-3 rounded-full bg-green-400" />
+                  <RadioGroup.Indicator className="w-3 h-3 rounded-full bg-danger-500" />
                 </RadioGroup.Item>
               </label>
 
               {/* OPTION 3 - Donated */}
               <label
                 htmlFor="r3"
-                className="flex items-center gap py-4 justify-between cursor-pointer border-b border-gray-300"
+                className="flex items-center gap py-4 justify-between cursor-pointer border-b border-utility-border hover:bg-impact-50 px-2 rounded-wasteless-sm transition-colors"
               >
                 <div>
-                  <span className="text-sm font-medium">Donated it 🎁</span>
-                  <p className="text-xs text-gray-500">I gave it to someone who needed it</p>
+                  <span className="text-sm font-medium font-poppins text-impact-600">Donated! 🎁</span>
+                  <p className="text-xs text-utility-text font-inter">I gave it to someone who needed it</p>
                 </div>
 
                 <RadioGroup.Item
                   value="DONATED"
                   id="r3"
-                  className="w-5 h-5 rounded-full border border-gray-400
-                     data-[state=checked]:border-green-400
-                     data-[state=checked]:bg-green-100
+                  className="w-5 h-5 rounded-full border border-utility-border
+                     data-[state=checked]:border-impact-500
+                     data-[state=checked]:bg-impact-100
                      flex items-center justify-center"
                 >
-                  <RadioGroup.Indicator className="w-3 h-3 rounded-full bg-green-400" />
+                  <RadioGroup.Indicator className="w-3 h-3 rounded-full bg-impact-500" />
                 </RadioGroup.Item>
               </label>
 
@@ -277,7 +284,7 @@ const ItemDetails = () => {
           </div>
 
           <button
-            className='bg-green-500 text-white py-3 px-10 rounded-full w-full hover:bg-green-600 disabled:opacity-50'
+            className='bg-brand-500 text-white py-3 px-6 rounded-wasteless w-full hover:bg-brand-600 active:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md font-poppins font-medium text-mobile-button'
             onClick={handleUpdateStatus}
             disabled={loading}
           >

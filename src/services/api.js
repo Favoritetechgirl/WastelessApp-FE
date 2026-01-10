@@ -6,6 +6,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
 
 // Request interceptor - Add JWT token to all requests
@@ -28,6 +29,18 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Handle network errors (backend not running, timeout, etc.)
+    if (!error.response) {
+      if (error.code === 'ECONNABORTED') {
+        console.error('Request timeout - Backend may not be running');
+      } else if (error.code === 'ERR_NETWORK') {
+        console.error('Network error - Backend not reachable at', api.defaults.baseURL);
+      } else {
+        console.error('Network error:', error.message);
+      }
+      return Promise.reject(error);
+    }
+
     if (error.response) {
       // Handle 401 Unauthorized - Token expired or invalid
       if (error.response.status === 401) {
