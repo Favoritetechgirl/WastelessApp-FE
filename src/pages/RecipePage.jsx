@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Search, X } from "lucide-react";
 import BottomNav from "../components/BottomNav";
 import { useAuth } from "../context/AuthContext";
 import { recipeService, inventoryService } from "../services";
@@ -34,6 +35,10 @@ export default function Recipe() {
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(false);
     const [inventoryItems, setInventoryItems] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showSearch, setShowSearch] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
+    const [searching, setSearching] = useState(false);
 
     useEffect(() => {
         if (user?.userId) {
@@ -62,6 +67,8 @@ export default function Recipe() {
         try {
             const data = await recipeService.getSuggestions(user.userId, { maxMissingIngredients: 5 });
             setRecipes(data);
+            setShowSearch(false);
+            setSearchResults([]);
 
             if (data.length === 0) {
                 toast.info("No recipes found. Try adding more items!");
@@ -76,20 +83,101 @@ export default function Recipe() {
         }
     };
 
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        if (!searchQuery.trim()) return;
+
+        setSearching(true);
+        try {
+            const data = await recipeService.searchRecipes(searchQuery);
+            setSearchResults(data);
+            setRecipes([]);
+
+            if (data.length === 0) {
+                toast.info(`No recipes found for "${searchQuery}"`);
+            } else {
+                toast.success(`Found ${data.length} recipes!`);
+            }
+        } catch (error) {
+            console.error("Failed to search recipes:", error);
+            toast.error("Failed to search recipes. Please try again.");
+        } finally {
+            setSearching(false);
+        }
+    };
+
+    const clearSearch = () => {
+        setSearchQuery("");
+        setSearchResults([]);
+        setShowSearch(false);
+    };
+
     const handleRecipeClick = (recipe) => {
         navigate(`/recipe-details/${recipe.id}`, { state: { recipe } });
     };
 
+    const displayedRecipes = searchResults.length > 0 ? searchResults : recipes;
+
     return (
         <div className="min-h-screen bg-surface-bg pb-28 px-5">
             <div className="pt-6 pb-4">
-                <h1 className="text-mobile-h2 md:text-desktop-h2 font-poppins font-medium text-slate-500">Recipes</h1>
-                <p className="text-mobile-body-sm md:text-desktop-body-sm font-inter text-utility-text mt-1">Find recipes using what you already have</p>
+                <div className="flex items-center justify-between mb-2">
+                    <h1 className="text-mobile-h2 md:text-desktop-h2 font-poppins font-medium text-slate-500">Recipes</h1>
+                    <button
+                        onClick={() => setShowSearch(!showSearch)}
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    >
+                        {showSearch ? <X className="w-5 h-5 text-slate-500" /> : <Search className="w-5 h-5 text-slate-500" />}
+                    </button>
+                </div>
+                <p className="text-mobile-body-sm md:text-desktop-body-sm font-inter text-utility-text mt-1">
+                    Find recipes using what you already have
+                </p>
+
+                {/* Search Bar */}
+                {showSearch && (
+                    <form onSubmit={handleSearch} className="mt-4">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search recipes e.g., Pasta, Jollof Rice..."
+                                className="w-full border border-gray-300 rounded-full px-4 py-3 pr-12 focus:outline-none focus:border-green-500"
+                            />
+                            <button
+                                type="submit"
+                                disabled={searching}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-green-500"
+                            >
+                                {searching ? (
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-500"></div>
+                                ) : (
+                                    <Search className="w-5 h-5" />
+                                )}
+                            </button>
+                        </div>
+                        {searchQuery && (
+                            <button
+                                type="button"
+                                onClick={clearSearch}
+                                className="mt-2 text-sm text-gray-500 hover:text-gray-700"
+                            >
+                                Clear search
+                            </button>
+                        )}
+                    </form>
+                )}
             </div>
 
-            {recipes.length > 0 ? (
+            {displayedRecipes.length > 0 ? (
                 <div className="space-y-3">
-                    {recipes.map((recipe) => (
+                    {searchResults.length > 0 && (
+                        <p className="text-sm text-gray-500 mb-2">
+                            Search results for "{searchQuery}"
+                        </p>
+                    )}
+                    {displayedRecipes.map((recipe) => (
                         <RecipeCard
                             key={recipe.id}
                             recipe={recipe}

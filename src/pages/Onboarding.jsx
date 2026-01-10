@@ -11,8 +11,10 @@ const Onboarding = () => {
   const navigate = useNavigate()
   const [onboardingSlide, setOnboardingSlide] = useState(1)
   const [username, setUsername] = useState('')
-  const [, setProfilePicture] = useState(null)
+  // eslint-disable-next-line no-unused-vars
+  const [profilePicture, setProfilePicture] = useState(null)
   const [profilePicturePreview, setProfilePicturePreview] = useState(null)
+  const [saving, setSaving] = useState(false)
 
   const [locations, setLocations] = useState({
     fridge: true,
@@ -57,16 +59,48 @@ const Onboarding = () => {
     setOnboardingSlide((prev) => prev + 1)
   }
 
-  const completeOnboarding = async () => {
+  const savePreferencesAndContinue = async () => {
+    setSaving(true)
     try {
+      // Save preferences to backend
+      await authService.saveOnboardingPreferences({
+        locations,
+        reminders,
+        username: username || null,
+        profilePicture: profilePicturePreview || null,
+      })
+      setOnboardingSlide((prev) => prev + 1)
+    } catch (error) {
+      console.error('Error saving preferences:', error)
+      // Continue anyway, preferences will use defaults
+      toast.warning('Could not save preferences, using defaults')
+      setOnboardingSlide((prev) => prev + 1)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const completeOnboarding = async () => {
+    setSaving(true)
+    try {
+      // Save final preferences before completing
+      await authService.saveOnboardingPreferences({
+        locations,
+        reminders,
+        username: username || null,
+        profilePicture: profilePicturePreview || null,
+      })
+
       // Call backend API to mark onboarding as completed
-      await authService.completeOnboarding();
+      await authService.completeOnboarding()
 
       // Navigate to inventory
-      navigate('/inventory');
+      navigate('/inventory')
     } catch (error) {
-      console.error('Error completing onboarding:', error);
-      toast.error('Failed to complete onboarding. Please try again.');
+      console.error('Error completing onboarding:', error)
+      toast.error('Failed to complete onboarding. Please try again.')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -338,9 +372,10 @@ const Onboarding = () => {
               Back
             </button>
             <button
-              onClick={() => setOnboardingSlide((prev) => prev + 1)}
-              className='bg-green-500 text-white py-4 px-10 rounded-full'>
-              Continue
+              onClick={savePreferencesAndContinue}
+              disabled={saving}
+              className='bg-green-500 text-white py-4 px-10 rounded-full disabled:opacity-50'>
+              {saving ? 'Saving...' : 'Continue'}
             </button>
           </div>
         </div>
@@ -370,8 +405,9 @@ const Onboarding = () => {
             </button>
             <button
               onClick={completeOnboarding}
-              className='bg-green-500 text-white py-4 px-10 rounded-full w-full lg:w-fit'>
-              Let's do this Thing
+              disabled={saving}
+              className='bg-green-500 text-white py-4 px-10 rounded-full w-full lg:w-fit disabled:opacity-50'>
+              {saving ? 'Finishing...' : "Let's do this Thing"}
             </button>
           </div>
         </div>

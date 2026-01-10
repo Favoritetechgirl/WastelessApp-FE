@@ -6,7 +6,7 @@ const TallyScore = () => {
   const navigate = useNavigate();
 
   return (
-    <div className='h-screen w-screen border-4 border-green-600'>
+    <div className='h-screen w-screen bg-white'>
 
       <div className='p-4'>
         <div className='flex items-center gap-3 mb-3'>

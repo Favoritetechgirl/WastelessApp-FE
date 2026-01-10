@@ -74,13 +74,13 @@ const Signup = () => {
                 password: formData.password
             };
 
-            await authService.register(userData);
+            // Register the user but don't auto-login
+            await authService.registerOnly(userData);
 
-            toast.success("Registration successful! Let's set up your account.");
+            toast.success("Registration successful! Please login to continue.");
 
-            // User is now logged in (authService stores the token)
-            // Navigate directly to onboarding for new users
-            navigate("/onboarding", { replace: true });
+            // Redirect to login page - user must login manually
+            navigate("/login", { replace: true });
         } catch (error) {
             // Better error messaging
             const errorMessage = error?.message || error?.error || "Failed to create account";
@@ -250,16 +250,32 @@ const Signup = () => {
 
                 {/* Social Login Buttons */}
                 <div className="flex justify-center gap-4">
-                    <button type="button" className="w-12 h-12 rounded-full border border-utility-border flex items-center justify-center hover:border-brand-500 hover:bg-brand-50 transition-all">
+                    <button
+                        type="button"
+                        className="w-12 h-12 rounded-full border border-utility-border flex items-center justify-center opacity-50 cursor-not-allowed"
+                        onClick={() => toast.info("Google signup coming soon!")}
+                        title="Coming soon"
+                    >
                         <FaGoogle className="text-danger-500 text-xl" />
                     </button>
-                    <button type="button" className="w-12 h-12 rounded-full border border-utility-border flex items-center justify-center hover:border-brand-500 hover:bg-brand-50 transition-all">
+                    <button
+                        type="button"
+                        className="w-12 h-12 rounded-full border border-utility-border flex items-center justify-center opacity-50 cursor-not-allowed"
+                        onClick={() => toast.info("Apple signup coming soon!")}
+                        title="Coming soon"
+                    >
                         <FaApple className="text-slate-500 text-2xl" />
                     </button>
-                    <button type="button" className="w-12 h-12 rounded-full border border-utility-border flex items-center justify-center hover:border-brand-500 hover:bg-brand-50 transition-all">
+                    <button
+                        type="button"
+                        className="w-12 h-12 rounded-full border border-utility-border flex items-center justify-center opacity-50 cursor-not-allowed"
+                        onClick={() => toast.info("Facebook signup coming soon!")}
+                        title="Coming soon"
+                    >
                         <FaFacebook className="text-impact-500 text-xl" />
                     </button>
                 </div>
+                <p className="text-center text-mobile-caption font-inter text-utility-text mt-3 mb-4">Social signup coming soon</p>
             </form>
         </div>
     );

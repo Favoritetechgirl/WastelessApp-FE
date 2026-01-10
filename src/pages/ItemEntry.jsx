@@ -209,7 +209,7 @@ const ItemEntry = () => {
   }
 
   return (
-    <div className='w-screen border-4 border-red-600 lg:flex items-center justify-center bg-gray-200 lg:h-screen'>
+    <div className='w-screen lg:flex items-center justify-center bg-gray-200 lg:h-screen'>
 
 
 

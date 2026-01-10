@@ -1,8 +1,34 @@
 import api from './api';
 
+// Safe localStorage helpers
+const safeGetItem = (key) => {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    console.warn('localStorage not available:', e.message);
+    return null;
+  }
+};
+
+const safeSetItem = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    console.warn('localStorage not available:', e.message);
+  }
+};
+
+const safeRemoveItem = (key) => {
+  try {
+    localStorage.removeItem(key);
+  } catch (e) {
+    console.warn('localStorage not available:', e.message);
+  }
+};
+
 const authService = {
   /**
-   * Register a new user
+   * Register a new user (and auto-login)
    * @param {Object} userData - { fullName, email, password }
    * @returns {Promise} Response with token and user data
    */
@@ -12,10 +38,26 @@ const authService = {
 
       // Store token and user data in localStorage
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data));
+        safeSetItem('token', response.data.token);
+        safeSetItem('user', JSON.stringify(response.data));
       }
 
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Register a new user WITHOUT auto-login
+   * User must login manually after registration
+   * @param {Object} userData - { fullName, email, password }
+   * @returns {Promise} Response with success message
+   */
+  registerOnly: async (userData) => {
+    try {
+      const response = await api.post('/auth/register', userData);
+      // Do NOT store token - user must login manually
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -33,8 +75,8 @@ const authService = {
 
       // Store token and user data in localStorage
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data));
+        safeSetItem('token', response.data.token);
+        safeSetItem('user', JSON.stringify(response.data));
       }
 
       return response.data;
@@ -52,14 +94,14 @@ const authService = {
       await api.post('/auth/logout');
 
       // Clear localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      safeRemoveItem('token');
+      safeRemoveItem('user');
 
       return { message: 'Logged out successfully' };
     } catch (error) {
       // Still clear localStorage even if API call fails
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      safeRemoveItem('token');
+      safeRemoveItem('user');
       throw error.response?.data || error.message;
     }
   },
@@ -82,7 +124,7 @@ const authService = {
    * @returns {boolean}
    */
   isAuthenticated: () => {
-    const token = localStorage.getItem('token');
+    const token = safeGetItem('token');
     return !!token;
   },
 
@@ -91,8 +133,13 @@ const authService = {
    * @returns {Object|null} User data or null
    */
   getStoredUser: () => {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    const userStr = safeGetItem('user');
+    if (!userStr) return null;
+    try {
+      return JSON.parse(userStr);
+    } catch (e) {
+      return null;
+    }
   },
 
   /**
@@ -106,16 +153,83 @@ const authService = {
 
       // Update user data in localStorage
       if (response.data) {
-        const currentUser = localStorage.getItem('user');
-        const token = localStorage.getItem('token');
+        const currentUser = safeGetItem('user');
+        const token = safeGetItem('token');
 
         const updatedUser = {
-          ...JSON.parse(currentUser),
+          ...(currentUser ? JSON.parse(currentUser) : {}),
           ...response.data,
           token: token
         };
 
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        safeSetItem('user', JSON.stringify(updatedUser));
+      }
+
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Save onboarding preferences (storage locations and reminders)
+   * @param {Object} preferences - { locations, reminders, username, profilePicture }
+   * @returns {Promise} Response with success message
+   */
+  saveOnboardingPreferences: async (preferences) => {
+    try {
+      const response = await api.put('/auth/onboarding-preferences', preferences);
+
+      // Update user data in localStorage with preferences
+      const currentUser = safeGetItem('user');
+      const token = safeGetItem('token');
+      if (currentUser) {
+        const updatedUser = {
+          ...JSON.parse(currentUser),
+          preferences: preferences,
+          token: token
+        };
+        safeSetItem('user', JSON.stringify(updatedUser));
+      }
+
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Get user settings (notification preferences, storage locations, etc.)
+   * @returns {Promise} User settings object
+   */
+  getSettings: async () => {
+    try {
+      const response = await api.get('/auth/settings');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Update notification settings
+   * @param {Object} settings - { oneDayBefore, threeDaysBefore, onExpiry, emailNotifications, pushNotifications }
+   * @returns {Promise} Updated settings
+   */
+  updateNotificationSettings: async (settings) => {
+    try {
+      const response = await api.put('/auth/notification-settings', settings);
+
+      // Update user data in localStorage with new settings
+      const currentUser = safeGetItem('user');
+      const token = safeGetItem('token');
+      if (currentUser) {
+        const updatedUser = {
+          ...JSON.parse(currentUser),
+          notificationSettings: settings,
+          token: token
+        };
+        safeSetItem('user', JSON.stringify(updatedUser));
       }
 
       return response.data;
@@ -133,15 +247,15 @@ const authService = {
       const response = await api.put('/auth/complete-onboarding');
 
       // Update user data in localStorage
-      const currentUser = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
+      const currentUser = safeGetItem('user');
+      const token = safeGetItem('token');
       if (currentUser) {
         const updatedUser = {
           ...JSON.parse(currentUser),
           onboardingCompleted: true,
           token: token
         };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        safeSetItem('user', JSON.stringify(updatedUser));
       }
 
       return response.data;
@@ -158,6 +272,50 @@ const authService = {
   changePassword: async (passwordData) => {
     try {
       const response = await api.put('/auth/change-password', passwordData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Request password reset email
+   * @param {string} email - User's email address
+   * @returns {Promise} Response with success message
+   */
+  forgotPassword: async (email) => {
+    try {
+      const response = await api.post('/auth/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Reset password with token
+   * @param {Object} resetData - { token, newPassword }
+   * @returns {Promise} Response with success message
+   */
+  resetPassword: async (resetData) => {
+    try {
+      const response = await api.post('/auth/reset-password', resetData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Delete user account
+   * @returns {Promise} Response with success message
+   */
+  deleteAccount: async () => {
+    try {
+      const response = await api.delete('/auth/account');
+      // Clear localStorage after account deletion
+      safeRemoveItem('token');
+      safeRemoveItem('user');
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
