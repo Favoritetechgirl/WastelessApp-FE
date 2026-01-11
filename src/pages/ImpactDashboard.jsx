@@ -16,7 +16,7 @@ const DEMO_IMPACT_DATA = {
 };
 
 export default function ImpactDashboard() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [impactData, setImpactData] = useState({
         totalItems: 0,
         itemsEaten: 0,
@@ -30,8 +30,17 @@ export default function ImpactDashboard() {
     const [isDemo, setIsDemo] = useState(false);
 
     useEffect(() => {
-        console.log('[ImpactDashboard] useEffect triggered, user:', user);
-        if (user?.userId) {
+        console.log('[ImpactDashboard] useEffect triggered, user:', user, 'authLoading:', authLoading);
+
+        // Wait for auth context to finish loading before deciding
+        if (authLoading) {
+            console.log('[ImpactDashboard] Auth still loading, waiting...');
+            return;
+        }
+
+        // Check for userId or id (for compatibility with different response formats)
+        const userId = user?.userId || user?.id;
+        if (userId) {
             fetchImpactData();
         } else {
             console.log('[ImpactDashboard] No user or userId, showing demo data');
@@ -40,7 +49,7 @@ export default function ImpactDashboard() {
             setLoading(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, selectedPeriod]);
+    }, [user, selectedPeriod, authLoading]);
 
     const fetchImpactData = async () => {
         console.log('[ImpactDashboard] fetchImpactData started');
@@ -49,7 +58,8 @@ export default function ImpactDashboard() {
         setIsDemo(false);
 
         try {
-            const data = await impactService.getSummary(user.userId, selectedPeriod);
+            const userId = user?.userId || user?.id;
+            const data = await impactService.getSummary(userId, selectedPeriod);
             setImpactData({
                 totalItems: data.totalItems || 0,
                 itemsEaten: data.itemsEaten || data.itemsSaved || 0,
@@ -79,7 +89,7 @@ export default function ImpactDashboard() {
         setSelectedPeriod(period);
     };
 
-    if (loading) {
+    if (loading || authLoading) {
         return (
             <div className="min-h-screen bg-surface-bg pb-28 p-4 flex flex-col items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mb-4"></div>

@@ -46,15 +46,24 @@ const SAMPLE_NOTIFICATIONS = [
 
 export default function Notifications() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDemo, setIsDemo] = useState(false);
 
     useEffect(() => {
-        console.log('[Notifications] useEffect triggered, user:', user);
-        if (user?.userId) {
+        console.log('[Notifications] useEffect triggered, user:', user, 'authLoading:', authLoading);
+
+        // Wait for auth context to finish loading before deciding
+        if (authLoading) {
+            console.log('[Notifications] Auth still loading, waiting...');
+            return;
+        }
+
+        // Check for userId or id (for compatibility with different response formats)
+        const userId = user?.userId || user?.id;
+        if (userId) {
             fetchNotifications();
         } else {
             console.log('[Notifications] No user or userId, showing demo notifications');
@@ -63,7 +72,7 @@ export default function Notifications() {
             setLoading(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [user, authLoading]);
 
     const fetchNotifications = async () => {
         console.log('[Notifications] fetchNotifications started');
@@ -72,7 +81,8 @@ export default function Notifications() {
         setIsDemo(false);
 
         try {
-            const data = await expirationService.getUpcomingExpirations(user.userId);
+            const userId = user?.userId || user?.id;
+            const data = await expirationService.getUpcomingExpirations(userId);
             const expirationNotifications = data.map(item => ({
                 id: item.id,
                 type: 'expiration',
@@ -119,7 +129,7 @@ export default function Notifications() {
         }
     };
 
-    if (loading) {
+    if (loading || authLoading) {
         return (
             <div className="min-h-screen bg-white pb-28 px-5 flex flex-col items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mb-4"></div>
