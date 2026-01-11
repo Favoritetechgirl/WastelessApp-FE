@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
   // Check for stored user on mount
   useEffect(() => {
-    const initAuth = () => {
+    const initAuth = async () => {
       try {
         const storedUser = authService.getStoredUser();
         const token = localStorage.getItem('token');
@@ -36,10 +36,27 @@ export const AuthProvider = ({ children }) => {
           setUser(storedUser);
           setIsAuthenticated(true);
         } else if (token && !storedUser) {
-          // Token exists but user data missing - try to refetch
-          console.warn('Token exists but user data is missing');
-          // For now, just mark as authenticated but user will need to be fetched
-          setIsAuthenticated(true);
+          // Token exists but user data missing - try to refetch from API
+          console.warn('Token exists but user data is missing - attempting to fetch user profile');
+          try {
+            const userData = await authService.getCurrentUser();
+            if (userData) {
+              // Store the fetched user data
+              localStorage.setItem('user', JSON.stringify(userData));
+              setUser(userData);
+              setIsAuthenticated(true);
+            } else {
+              // Couldn't fetch user, clear token and require re-login
+              console.warn('Could not fetch user data, clearing token');
+              localStorage.removeItem('token');
+              setIsAuthenticated(false);
+            }
+          } catch (fetchError) {
+            console.error('Failed to fetch user profile:', fetchError);
+            // Token might be invalid, clear it
+            localStorage.removeItem('token');
+            setIsAuthenticated(false);
+          }
         }
       } catch (error) {
         console.error('Error initializing auth:', error);

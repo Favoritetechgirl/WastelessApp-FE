@@ -29,6 +29,23 @@ export default function ImpactDashboard() {
     const [selectedPeriod, setSelectedPeriod] = useState('month');
     const [isDemo, setIsDemo] = useState(false);
 
+    // Get userId from user object or localStorage as fallback (same pattern as ItemEntry)
+    const getUserId = () => {
+        if (user?.userId) return user.userId;
+        if (user?.id) return user.id;
+        // Fallback to localStorage
+        try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const parsed = JSON.parse(storedUser);
+                return parsed.userId || parsed.id;
+            }
+        } catch (e) {
+            console.error('[ImpactDashboard] Error getting userId from localStorage:', e);
+        }
+        return null;
+    };
+
     useEffect(() => {
         console.log('[ImpactDashboard] useEffect triggered, user:', user, 'authLoading:', authLoading);
 
@@ -38,8 +55,8 @@ export default function ImpactDashboard() {
             return;
         }
 
-        // Check for userId or id (for compatibility with different response formats)
-        const userId = user?.userId || user?.id;
+        // Check for userId using the robust getter (includes localStorage fallback)
+        const userId = getUserId();
         if (userId) {
             fetchImpactData();
         } else {
@@ -58,7 +75,7 @@ export default function ImpactDashboard() {
         setIsDemo(false);
 
         try {
-            const userId = user?.userId || user?.id;
+            const userId = getUserId();
             const data = await impactService.getSummary(userId, selectedPeriod);
             setImpactData({
                 totalItems: data.totalItems || 0,

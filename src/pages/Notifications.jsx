@@ -52,6 +52,23 @@ export default function Notifications() {
     const [error, setError] = useState(null);
     const [isDemo, setIsDemo] = useState(false);
 
+    // Get userId from user object or localStorage as fallback (same pattern as ItemEntry)
+    const getUserId = () => {
+        if (user?.userId) return user.userId;
+        if (user?.id) return user.id;
+        // Fallback to localStorage
+        try {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const parsed = JSON.parse(storedUser);
+                return parsed.userId || parsed.id;
+            }
+        } catch (e) {
+            console.error('[Notifications] Error getting userId from localStorage:', e);
+        }
+        return null;
+    };
+
     useEffect(() => {
         console.log('[Notifications] useEffect triggered, user:', user, 'authLoading:', authLoading);
 
@@ -61,8 +78,8 @@ export default function Notifications() {
             return;
         }
 
-        // Check for userId or id (for compatibility with different response formats)
-        const userId = user?.userId || user?.id;
+        // Check for userId using the robust getter (includes localStorage fallback)
+        const userId = getUserId();
         if (userId) {
             fetchNotifications();
         } else {
@@ -81,7 +98,7 @@ export default function Notifications() {
         setIsDemo(false);
 
         try {
-            const userId = user?.userId || user?.id;
+            const userId = getUserId();
             const data = await expirationService.getUpcomingExpirations(userId);
             const expirationNotifications = data.map(item => ({
                 id: item.id,
