@@ -6,6 +6,15 @@ import { useAuth } from "../context/AuthContext";
 import { impactService } from "../services";
 import ImpactEmpty from "./ImpactEmpty";
 
+// Demo data for when user is not authenticated or backend is unavailable
+const DEMO_IMPACT_DATA = {
+    totalItems: 47,
+    itemsEaten: 38,
+    itemsWasted: 5,
+    moneySaved: 12500,
+    co2Saved: 8.2
+};
+
 export default function ImpactDashboard() {
     const { user } = useAuth();
     const [impactData, setImpactData] = useState({
@@ -17,16 +26,18 @@ export default function ImpactDashboard() {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedPeriod, setSelectedPeriod] = useState('month'); // week, month, year, all
+    const [selectedPeriod, setSelectedPeriod] = useState('month');
+    const [isDemo, setIsDemo] = useState(false);
 
     useEffect(() => {
         console.log('[ImpactDashboard] useEffect triggered, user:', user);
         if (user?.userId) {
             fetchImpactData();
         } else {
-            console.log('[ImpactDashboard] No user or userId, stopping loading');
+            console.log('[ImpactDashboard] No user or userId, showing demo data');
+            setImpactData(DEMO_IMPACT_DATA);
+            setIsDemo(true);
             setLoading(false);
-            setError('User not authenticated');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, selectedPeriod]);
@@ -35,12 +46,10 @@ export default function ImpactDashboard() {
         console.log('[ImpactDashboard] fetchImpactData started');
         setLoading(true);
         setError(null);
+        setIsDemo(false);
 
         try {
-            console.log('[ImpactDashboard] Calling impactService.getSummary with:', { userId: user.userId, selectedPeriod });
             const data = await impactService.getSummary(user.userId, selectedPeriod);
-            console.log('[ImpactDashboard] Data received:', data);
-
             setImpactData({
                 totalItems: data.totalItems || 0,
                 itemsEaten: data.itemsEaten || data.itemsSaved || 0,
@@ -48,29 +57,20 @@ export default function ImpactDashboard() {
                 moneySaved: data.moneySaved || 0,
                 co2Saved: data.co2Saved || 0
             });
-            console.log('[ImpactDashboard] Impact data set successfully');
         } catch (error) {
             console.error("[ImpactDashboard] Failed to fetch impact data:", error);
-
-            // Check if it's a network error (backend not running or cold start)
             if (!error.response || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
-                const errorMsg = "Cannot connect to backend server. The server may be starting up (this can take up to 60 seconds on free tier). Please wait and try again.";
-                setError(errorMsg);
-                toast.error("Backend server is starting up, please wait...");
-                console.error('[ImpactDashboard]', errorMsg);
+                setImpactData(DEMO_IMPACT_DATA);
+                setIsDemo(true);
+                toast.info("Showing demo data - backend is starting up");
             } else if (error.response?.status === 401 || error.response?.status === 403) {
-                const errorMsg = "Authentication failed. Please login again.";
-                setError(errorMsg);
-                toast.error("Authentication error");
-                console.error('[ImpactDashboard]', errorMsg);
+                setImpactData(DEMO_IMPACT_DATA);
+                setIsDemo(true);
+                toast.info("Please login for personalized data");
             } else {
-                const errorMsg = error.response?.data?.message || "Failed to load impact data";
-                setError(errorMsg);
-                toast.error(errorMsg);
-                console.error('[ImpactDashboard]', errorMsg);
+                setError(error.response?.data?.message || "Failed to load impact data");
             }
         } finally {
-            console.log('[ImpactDashboard] Setting loading to false');
             setLoading(false);
         }
     };
@@ -84,13 +84,11 @@ export default function ImpactDashboard() {
             <div className="min-h-screen bg-surface-bg pb-28 p-4 flex flex-col items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mb-4"></div>
                 <p className="text-utility-text font-inter text-mobile-body">Loading impact data...</p>
-                <p className="text-utility-text font-inter text-mobile-caption mt-2 opacity-70">This may take a moment if the server is waking up</p>
             </div>
         );
     }
 
-    // Show error state if backend connection failed
-    if (error) {
+    if (error && !isDemo) {
         return (
             <div className="min-h-screen bg-surface-bg pb-28 p-4">
                 <h1 className="font-poppins font-medium text-mobile-h1 mb-4 text-slate-500">Impact</h1>
@@ -110,8 +108,7 @@ export default function ImpactDashboard() {
         );
     }
 
-    // Show empty state if no items tracked yet
-    if (impactData.totalItems === 0) {
+    if (impactData.totalItems === 0 && !isDemo) {
         return <ImpactEmpty />;
     }
 
@@ -119,7 +116,14 @@ export default function ImpactDashboard() {
         <div className="min-h-screen bg-surface-bg pb-28 p-4">
             <h1 className="font-poppins font-medium text-mobile-h1 mb-4 text-slate-500">Impact</h1>
 
-            {/* Period Tabs */}
+            {isDemo && (
+                <div className="bg-amber-50 border border-amber-200 rounded-wasteless p-3 mb-4">
+                    <p className="text-amber-800 text-mobile-body-sm font-inter">
+                        <span className="font-semibold">Demo Mode:</span> Login to see your personal impact data
+                    </p>
+                </div>
+            )}
+
             <div className="flex gap-2 mb-6 overflow-x-auto">
                 <button
                     onClick={() => handlePeriodChange('week')}
@@ -164,23 +168,20 @@ export default function ImpactDashboard() {
             </div>
 
             <div className="space-y-4">
-                {/* Stats */}
                 <div className="grid grid-cols-3 gap-3">
                     <StatCard number={impactData.totalItems.toString()} label="Items Tracked" variant="default" />
                     <StatCard number={impactData.itemsEaten.toString()} label="Food Rescued!" variant="success" />
                     <StatCard number={impactData.itemsWasted.toString()} label="Items Spoiled" variant="warning" />
                 </div>
 
-                {/* Green Card - Money Saved */}
                 <div className="bg-gradient-to-br from-brand-700 to-brand-800 text-white p-5 rounded-wasteless shadow-wasteless-lg">
                     <p className="text-mobile-metric md:text-desktop-metric font-poppins font-bold">₦{impactData.moneySaved.toLocaleString()}</p>
-                    <p className="text-mobile-body-sm font-inter mt-1 opacity-90">Money Saved 💰</p>
+                    <p className="text-mobile-body-sm font-inter mt-1 opacity-90">Money Saved</p>
                 </div>
 
-                {/* Blue Card - Environmental Impact */}
                 <div className="bg-gradient-to-br from-impact-600 to-impact-700 text-white p-5 rounded-wasteless shadow-wasteless-lg">
-                    <p className="text-mobile-metric md:text-desktop-metric font-poppins font-bold">{impactData.co2Saved.toFixed(1)} kg CO₂</p>
-                    <p className="text-mobile-body-sm font-inter mt-1 opacity-90">CO₂ Impact Prevented 🌍</p>
+                    <p className="text-mobile-metric md:text-desktop-metric font-poppins font-bold">{impactData.co2Saved.toFixed(1)} kg CO2</p>
+                    <p className="text-mobile-body-sm font-inter mt-1 opacity-90">CO2 Impact Prevented</p>
                 </div>
             </div>
 

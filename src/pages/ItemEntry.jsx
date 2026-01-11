@@ -10,7 +10,7 @@ import openFoodFactsService from '../services/openFoodFactsService'
 const ItemEntry = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, loading: authLoading } = useAuth()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState('')
   const [showScanner, setShowScanner] = useState(false)

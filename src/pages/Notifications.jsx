@@ -5,21 +5,62 @@ import BottomNav from "../components/BottomNav";
 import { useAuth } from "../context/AuthContext";
 import { expirationService } from "../services";
 
+// Sample notifications for demo mode
+const SAMPLE_NOTIFICATIONS = [
+    {
+        id: 1,
+        type: 'expiration',
+        title: 'Expiration Alert',
+        message: 'Milk expiring in 2 day(s)',
+        timestamp: new Date()
+    },
+    {
+        id: 2,
+        type: 'expiration',
+        title: 'Expiration Alert',
+        message: 'Bread expiring in 1 day(s)',
+        timestamp: new Date()
+    },
+    {
+        id: 3,
+        type: 'expiration',
+        title: 'Expiration Alert',
+        message: 'Yogurt expiring in 3 day(s)',
+        timestamp: new Date()
+    },
+    {
+        id: 4,
+        type: 'recipe',
+        title: 'Recipe Suggestion',
+        message: 'Try making French Toast with your expiring bread!',
+        timestamp: new Date()
+    },
+    {
+        id: 5,
+        type: 'expiration',
+        title: 'Expiration Alert',
+        message: 'Eggs expiring in 5 day(s)',
+        timestamp: new Date()
+    }
+];
+
 export default function Notifications() {
     const navigate = useNavigate();
     const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isDemo, setIsDemo] = useState(false);
 
     useEffect(() => {
         console.log('[Notifications] useEffect triggered, user:', user);
         if (user?.userId) {
             fetchNotifications();
         } else {
-            console.log('[Notifications] No user or userId, stopping loading');
+            console.log('[Notifications] No user or userId, showing demo notifications');
+            setNotifications(SAMPLE_NOTIFICATIONS);
+            setIsDemo(true);
             setLoading(false);
-            setError('User not authenticated');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
@@ -28,13 +69,10 @@ export default function Notifications() {
         console.log('[Notifications] fetchNotifications started');
         setLoading(true);
         setError(null);
+        setIsDemo(false);
 
         try {
-            console.log('[Notifications] Calling expirationService.getUpcomingExpirations with userId:', user.userId);
             const data = await expirationService.getUpcomingExpirations(user.userId);
-            console.log('[Notifications] Data received:', data);
-
-            // Transform expiration data into notifications
             const expirationNotifications = data.map(item => ({
                 id: item.id,
                 type: 'expiration',
@@ -43,29 +81,21 @@ export default function Notifications() {
                 timestamp: new Date()
             }));
             setNotifications(expirationNotifications);
-            console.log('[Notifications] Notifications set successfully:', expirationNotifications.length, 'items');
         } catch (error) {
             console.error("[Notifications] Failed to fetch notifications:", error);
 
-            // Better error handling
             if (!error.response || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
-                const errorMsg = "Cannot connect to backend server. The server may be starting up (this can take up to 60 seconds on free tier). Please wait and try again.";
-                setError(errorMsg);
-                toast.error("Backend server is starting up, please wait...");
-                console.error('[Notifications]', errorMsg);
+                setNotifications(SAMPLE_NOTIFICATIONS);
+                setIsDemo(true);
+                toast.info("Showing demo notifications - backend is starting up");
             } else if (error.response?.status === 401 || error.response?.status === 403) {
-                const errorMsg = "Authentication failed. Please login again.";
-                setError(errorMsg);
-                toast.error("Authentication error");
-                console.error('[Notifications]', errorMsg);
+                setNotifications(SAMPLE_NOTIFICATIONS);
+                setIsDemo(true);
+                toast.info("Please login for personalized notifications");
             } else {
-                const errorMsg = error.response?.data?.message || "Failed to load notifications";
-                setError(errorMsg);
-                toast.error(errorMsg);
-                console.error('[Notifications]', errorMsg);
+                setError(error.response?.data?.message || "Failed to load notifications");
             }
         } finally {
-            console.log('[Notifications] Setting loading to false');
             setLoading(false);
         }
     };
@@ -94,13 +124,11 @@ export default function Notifications() {
             <div className="min-h-screen bg-white pb-28 px-5 flex flex-col items-center justify-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mb-4"></div>
                 <p className="text-gray-500">Loading notifications...</p>
-                <p className="text-gray-400 text-sm mt-2">This may take a moment if the server is waking up</p>
             </div>
         );
     }
 
-    // Show error state if there's an error
-    if (error) {
+    if (error && !isDemo) {
         return (
             <div className="min-h-screen bg-white pb-28 px-5">
                 <header className="pt-6 pb-4 flex items-center gap-3">
@@ -129,6 +157,15 @@ export default function Notifications() {
                 <button onClick={() => navigate(-1)} className="text-2xl">←</button>
                 <h1 className="text-lg font-semibold">Notifications</h1>
             </header>
+
+            {/* Demo Mode Banner */}
+            {isDemo && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+                    <p className="text-amber-800 text-sm">
+                        <span className="font-semibold">Demo Mode:</span> Login to see your personal notifications
+                    </p>
+                </div>
+            )}
 
             {notifications.length > 0 ? (
                 <div className="space-y-3">
