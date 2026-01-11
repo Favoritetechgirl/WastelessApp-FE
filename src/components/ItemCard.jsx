@@ -35,11 +35,26 @@ export default function ItemCard({ image, title, qty, tag, expires, onClick }) {
 
     // Check if image is a valid URL or base64 string
     const hasValidImage = image && !imageError && (
-        image.startsWith('http') ||
-        image.startsWith('https') ||
-        image.startsWith('data:image') ||
-        image.startsWith('/')
+        typeof image === 'string' && (
+            image.startsWith('http') ||
+            image.startsWith('https') ||
+            image.startsWith('data:image') ||
+            image.startsWith('data:application') ||
+            image.startsWith('/') ||
+            // Handle base64 images that might not have the data: prefix
+            image.length > 100 // Long strings are likely base64
+        )
     );
+
+    // Get the image source, adding data prefix if needed for raw base64
+    const getImageSrc = () => {
+        if (!image) return '';
+        // If it's a raw base64 string without prefix
+        if (image.length > 100 && !image.startsWith('data:') && !image.startsWith('http') && !image.startsWith('/')) {
+            return `data:image/jpeg;base64,${image}`;
+        }
+        return image;
+    };
 
     // Get initials or first letter for placeholder
     const getPlaceholderText = () => {
@@ -92,7 +107,7 @@ export default function ItemCard({ image, title, qty, tag, expires, onClick }) {
             <div className="w-16 h-16 rounded-wasteless-sm overflow-hidden bg-surface-accent flex-shrink-0">
                 {hasValidImage ? (
                     <img
-                        src={image}
+                        src={getImageSrc()}
                         alt={title}
                         className="w-full h-full object-cover"
                         onError={() => setImageError(true)}

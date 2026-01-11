@@ -170,7 +170,7 @@ export default function InventoryHome() {
                         {filteredItems.map((item) => (
                             <ItemCard
                                 key={item.id}
-                                image={item.imageUrl || item.image}
+                                image={item.imageUrl || item.image || item.imageBase64 || item.picture || item.photo}
                                 title={item.name}
                                 qty={`${item.quantity}`}
                                 tag={item.category}

@@ -36,20 +36,10 @@ export default function ImpactDashboard() {
         setLoading(true);
         setError(null);
 
-        // Add a timeout safeguard
-        const timeoutId = setTimeout(() => {
-            console.error('[ImpactDashboard] Request timeout after 15 seconds');
-            setLoading(false);
-            setError("Request timed out. Please check if the backend is running.");
-            toast.error("Request timed out");
-        }, 15000);
-
         try {
             console.log('[ImpactDashboard] Calling impactService.getSummary with:', { userId: user.userId, selectedPeriod });
             const data = await impactService.getSummary(user.userId, selectedPeriod);
             console.log('[ImpactDashboard] Data received:', data);
-
-            clearTimeout(timeoutId); // Clear timeout if request succeeds
 
             setImpactData({
                 totalItems: data.totalItems || 0,
@@ -60,14 +50,13 @@ export default function ImpactDashboard() {
             });
             console.log('[ImpactDashboard] Impact data set successfully');
         } catch (error) {
-            clearTimeout(timeoutId); // Clear timeout if request fails
             console.error("[ImpactDashboard] Failed to fetch impact data:", error);
 
-            // Check if it's a network error (backend not running)
+            // Check if it's a network error (backend not running or cold start)
             if (!error.response || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
-                const errorMsg = "Cannot connect to backend server. Please ensure the backend is running on port 8080.";
+                const errorMsg = "Cannot connect to backend server. The server may be starting up (this can take up to 60 seconds on free tier). Please wait and try again.";
                 setError(errorMsg);
-                toast.error("Backend server not available");
+                toast.error("Backend server is starting up, please wait...");
                 console.error('[ImpactDashboard]', errorMsg);
             } else if (error.response?.status === 401 || error.response?.status === 403) {
                 const errorMsg = "Authentication failed. Please login again.";
@@ -92,8 +81,10 @@ export default function ImpactDashboard() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-surface-bg pb-28 p-4 flex items-center justify-center">
+            <div className="min-h-screen bg-surface-bg pb-28 p-4 flex flex-col items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-500 mb-4"></div>
                 <p className="text-utility-text font-inter text-mobile-body">Loading impact data...</p>
+                <p className="text-utility-text font-inter text-mobile-caption mt-2 opacity-70">This may take a moment if the server is waking up</p>
             </div>
         );
     }

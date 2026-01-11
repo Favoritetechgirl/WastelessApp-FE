@@ -6,14 +6,14 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 60000, // 60 second timeout for Render.com cold starts
+  timeout: 90000, // 90 second timeout for Render.com cold starts (increased from 60s)
 });
 
-// Retry configuration for cold starts
+// Retry configuration for cold starts (Render.com free tier can take 15-30s to wake up)
 const RETRY_CONFIG = {
-  maxRetries: 3,
-  baseDelay: 2000, // 2 seconds base delay
-  maxDelay: 10000, // Max 10 seconds delay
+  maxRetries: 5,
+  baseDelay: 5000, // 5 seconds base delay (increased for Render cold starts)
+  maxDelay: 30000, // Max 30 seconds delay (increased for Render cold starts)
 };
 
 // Helper function to delay execution
@@ -68,8 +68,9 @@ api.interceptors.response.use(
       config.retryCount += 1;
       const retryDelay = getRetryDelay(config.retryCount - 1);
 
-      console.log(`Request failed, retrying (${config.retryCount}/${RETRY_CONFIG.maxRetries}) in ${retryDelay}ms...`);
-      console.log('Backend may be waking up from sleep mode (Render.com free tier cold start)');
+      console.log(`[API Retry] Request to ${config.url} failed, retrying (${config.retryCount}/${RETRY_CONFIG.maxRetries}) in ${retryDelay/1000}s...`);
+      console.log('[API Retry] Backend may be waking up from sleep mode (Render.com free tier cold start - can take 15-30s)');
+      console.log(`[API Retry] Error: ${error.code || error.response?.status || error.message}`);
 
       await delay(retryDelay);
       return api(config);

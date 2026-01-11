@@ -122,7 +122,15 @@ const ItemDetails = () => {
 
           <img
             className='border-2 border-utility-border rounded-wasteless w-full h-48 object-cover bg-surface-accent shadow-wasteless'
-            src={item.imageUrl || '/assets/placeholder.png'}
+            src={(() => {
+              const img = item.imageUrl || item.image;
+              if (!img) return '/assets/placeholder.png';
+              // Handle raw base64 without data prefix
+              if (img.length > 100 && !img.startsWith('data:') && !img.startsWith('http') && !img.startsWith('/')) {
+                return `data:image/jpeg;base64,${img}`;
+              }
+              return img;
+            })()}
             alt={item.name}
             onError={(e) => {
               e.target.src = '/assets/placeholder.png'
