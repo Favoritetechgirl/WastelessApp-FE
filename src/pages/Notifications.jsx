@@ -10,6 +10,7 @@ export default function Notifications() {
     const { user } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMessage, setLoadingMessage] = useState('Loading notifications...');
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -27,14 +28,17 @@ export default function Notifications() {
     const fetchNotifications = async () => {
         console.log('[Notifications] fetchNotifications started');
         setLoading(true);
+        setLoadingMessage('Loading notifications...');
         setError(null);
 
-        // Add a timeout safeguard
-        const timeoutId = setTimeout(() => {
-            console.error('[Notifications] Request timeout after 15 seconds');
-            setLoading(false);
-            setError("Request timed out. Please check if the backend is running.");
-            toast.error("Request timed out");
+        // Show extended wait message after 5 seconds
+        const waitTimer = setTimeout(() => {
+            setLoadingMessage('Server is waking up, please wait...');
+        }, 5000);
+
+        // Show longer wait message after 15 seconds
+        const longWaitTimer = setTimeout(() => {
+            setLoadingMessage('Still connecting... This may take up to a minute on first load.');
         }, 15000);
 
         try {
@@ -42,27 +46,29 @@ export default function Notifications() {
             const data = await expirationService.getUpcomingExpirations(user.userId);
             console.log('[Notifications] Data received:', data);
 
-            clearTimeout(timeoutId); // Clear timeout if request succeeds
+            clearTimeout(waitTimer);
+            clearTimeout(longWaitTimer);
 
             // Transform expiration data into notifications
             const expirationNotifications = data.map(item => ({
                 id: item.id,
                 type: 'expiration',
                 title: 'Expiration Alert',
-                message: `${item.name} expiring in ${calculateDaysLeft(item.expirationDate)} day(s)`,
+                message: `${item.name} expiring in ${calculateDaysLeft(item.expirationDate || item.expiryDate)} day(s)`,
                 timestamp: new Date()
             }));
             setNotifications(expirationNotifications);
             console.log('[Notifications] Notifications set successfully:', expirationNotifications.length, 'items');
         } catch (error) {
-            clearTimeout(timeoutId); // Clear timeout if request fails
+            clearTimeout(waitTimer);
+            clearTimeout(longWaitTimer);
             console.error("[Notifications] Failed to fetch notifications:", error);
 
             // Better error handling
             if (!error.response || error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
-                const errorMsg = "Cannot connect to backend server. Please ensure the backend is running on port 8080.";
+                const errorMsg = "Cannot connect to server. The backend may still be starting up. Please try again.";
                 setError(errorMsg);
-                toast.error("Backend server not available");
+                toast.error("Connection failed - try again");
                 console.error('[Notifications]', errorMsg);
             } else if (error.response?.status === 401 || error.response?.status === 403) {
                 const errorMsg = "Authentication failed. Please login again.";
@@ -78,10 +84,12 @@ export default function Notifications() {
         } finally {
             console.log('[Notifications] Setting loading to false');
             setLoading(false);
+            setLoadingMessage('');
         }
     };
 
     const calculateDaysLeft = (expirationDate) => {
+        if (!expirationDate) return 0;
         const today = new Date();
         const expDate = new Date(expirationDate);
         const diffTime = expDate - today;
@@ -102,8 +110,9 @@ export default function Notifications() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-white pb-28 px-5 flex items-center justify-center">
-                <p className="text-gray-500">Loading notifications...</p>
+            <div className="min-h-screen bg-white pb-28 px-5 flex flex-col items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500 mb-4"></div>
+                <p className="text-gray-500 animate-pulse">{loadingMessage}</p>
             </div>
         );
     }
@@ -122,7 +131,7 @@ export default function Notifications() {
                     <p className="text-gray-500 text-center text-sm mb-6">{error}</p>
                     <button
                         onClick={() => fetchNotifications()}
-                        className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-all font-medium shadow-sm hover:shadow-md"
+                        className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-all font-medium shadow-sm hover:shadow-md"
                     >
                         Try Again
                     </button>
