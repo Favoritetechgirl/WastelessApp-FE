@@ -12,6 +12,7 @@ const ItemEntry = () => {
   const location = useLocation()
   const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [loadingMessage, setLoadingMessage] = useState('')
   const [showScanner, setShowScanner] = useState(false)
   const fileInputRef = React.useRef(null)
 
@@ -100,11 +101,13 @@ const ItemEntry = () => {
     }
 
     setLoading(true)
+    setLoadingMessage('Saving item...')
 
     try {
       // Convert image to Base64 if present
       let imageUrl = null
       if (formData.image) {
+        setLoadingMessage('Processing image...')
         imageUrl = await convertImageToBase64(formData.image)
       } else if (isEditMode && editingItem.imageUrl) {
         // Keep existing image if no new image is uploaded
@@ -129,19 +132,30 @@ const ItemEntry = () => {
         imageUrl: imageUrl
       }
 
+      // Show message about potential cold start
+      setLoadingMessage('Connecting to server (this may take a moment if server is waking up)...')
+
+      // Set up a timer to show extended wait message
+      const waitTimer = setTimeout(() => {
+        setLoadingMessage('Server is starting up, please wait...')
+      }, 5000)
+
       if (isEditMode) {
         // Update existing item
         await inventoryService.updateItem(editingItem.id, itemData)
+        clearTimeout(waitTimer)
         toast.success('Item updated successfully!')
       } else {
         // Add new item
         const userId = getUserId()
         if (!userId) {
+          clearTimeout(waitTimer)
           toast.error('User not found. Please log in again.')
           navigate('/login')
           return
         }
         await inventoryService.addItem(userId, itemData)
+        clearTimeout(waitTimer)
         toast.success('Item added successfully!')
       }
 
@@ -149,11 +163,25 @@ const ItemEntry = () => {
     } catch (error) {
       console.error(`Error ${isEditMode ? 'updating' : 'adding'} item:`, error)
 
-      // Show more detailed error message
-      const errorMessage = error?.response?.data?.message || error?.message || `Failed to ${isEditMode ? 'update' : 'add'} item. Please try again.`
+      // Show more detailed error message based on error type
+      let errorMessage = `Failed to ${isEditMode ? 'update' : 'add'} item. Please try again.`
+
+      if (error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')) {
+        errorMessage = 'Request timed out. The server may be sleeping. Please try again in a moment.'
+      } else if (error?.code === 'ERR_NETWORK') {
+        errorMessage = 'Cannot reach server. Please check your internet connection and try again.'
+      } else if (error?.response?.status === 502 || error?.response?.status === 503) {
+        errorMessage = 'Server is temporarily unavailable. Please try again in a moment.'
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message
+      } else if (error?.message) {
+        errorMessage = error.message
+      }
+
       toast.error(errorMessage)
     } finally {
       setLoading(false)
+      setLoadingMessage('')
     }
   }
 
@@ -548,26 +576,39 @@ const ItemEntry = () => {
         </div>
 
 
-        <div className='h-20 w-full mb-12 lg:mb-0 flex items-center justify-between p-3'>
+        <div className='h-auto w-full mb-12 lg:mb-0 flex flex-col items-center p-3'>
+          {loading && loadingMessage && (
+            <div className='w-full text-center mb-4 text-sm text-gray-600 animate-pulse'>
+              {loadingMessage}
+            </div>
+          )}
 
-          <button
-            className='py-4 px-10 bg-gray-200 rounded-4xl'
-            onClick={handleCancel}
-            disabled={loading}
-          >
-            Cancel
-          </button>
+          <div className='w-full flex items-center justify-between'>
+            <button
+              className='py-4 px-10 bg-gray-200 rounded-4xl'
+              onClick={handleCancel}
+              disabled={loading}
+            >
+              Cancel
+            </button>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className='bg-green-500 text-white py-4 px-10 rounded-4xl disabled:opacity-50'
-          >
-            {loading
-              ? (isEditMode ? 'Updating...' : 'Adding...')
-              : (isEditMode ? 'Update Item' : 'Add to Inventory')
-            }
-          </button>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className='bg-green-500 text-white py-4 px-10 rounded-4xl disabled:opacity-50 flex items-center gap-2'
+            >
+              {loading && (
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {loading
+                ? (isEditMode ? 'Updating...' : 'Adding...')
+                : (isEditMode ? 'Update Item' : 'Add to Inventory')
+              }
+            </button>
+          </div>
         </div>
       </div>
 

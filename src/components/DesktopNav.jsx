@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import image_assets from '../assets/images/images'
+import image_assets from '../assets/images/images.js'
 
 import { Store, CookingPot, Trophy, Settings, Bell } from 'lucide-react'
 
