@@ -43,24 +43,30 @@ api.interceptors.response.use(
 
     if (error.response) {
       // Handle 401 Unauthorized - Token expired or invalid
+      // Only clear auth and redirect for actual auth failures, not for login attempts
       if (error.response.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        const isAuthEndpoint = error.config?.url?.includes('/auth/login') ||
+                               error.config?.url?.includes('/auth/register');
+
+        // Only auto-logout for 401 on protected endpoints, not on login/register failures
+        if (!isAuthEndpoint) {
+          console.error('Authentication expired or invalid');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
       }
 
-      // Handle 403 Forbidden - Could be expired token
+      // Handle 403 Forbidden - Don't auto-logout, just log the error
+      // 403 can mean many things besides token issues (missing endpoint, permissions, etc.)
       if (error.response.status === 403) {
-        console.error('Access denied');
-        // Clear auth data and redirect to login if token might be expired
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        console.error('Access denied:', error.config?.url);
+        // Don't automatically clear auth - this could be a permissions issue, not a token issue
       }
 
       // Handle 404 Not Found
       if (error.response.status === 404) {
-        console.error('Resource not found');
+        console.error('Resource not found:', error.config?.url);
       }
 
       // Handle 500 Internal Server Error
