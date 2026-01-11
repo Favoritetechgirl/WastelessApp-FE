@@ -10,10 +10,27 @@ import openFoodFactsService from '../services/openFoodFactsService'
 const ItemEntry = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [showScanner, setShowScanner] = useState(false)
   const fileInputRef = React.useRef(null)
+
+  // Get userId from user object or localStorage as fallback
+  const getUserId = () => {
+    if (user?.userId) return user.userId
+    if (user?.id) return user.id
+    // Fallback to localStorage
+    try {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser)
+        return parsed.userId || parsed.id
+      }
+    } catch (e) {
+      console.error('Error getting userId from localStorage:', e)
+    }
+    return null
+  }
 
   // Check if we're editing an existing item
   const editingItem = location.state?.item
@@ -118,7 +135,13 @@ const ItemEntry = () => {
         toast.success('Item updated successfully!')
       } else {
         // Add new item
-        await inventoryService.addItem(user.userId, itemData)
+        const userId = getUserId()
+        if (!userId) {
+          toast.error('User not found. Please log in again.')
+          navigate('/login')
+          return
+        }
+        await inventoryService.addItem(userId, itemData)
         toast.success('Item added successfully!')
       }
 

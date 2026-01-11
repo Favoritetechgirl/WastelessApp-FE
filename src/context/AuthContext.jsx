@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import { authService } from "../services";
 
@@ -11,14 +11,44 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Check for stored user on mount
-  useEffect(() => {
+  // Function to refresh user from localStorage
+  const refreshUser = useCallback(() => {
     const storedUser = authService.getStoredUser();
     if (storedUser) {
       setUser(storedUser);
       setIsAuthenticated(true);
+      return storedUser;
+    } else {
+      setUser(null);
+      setIsAuthenticated(false);
+      return null;
     }
-    setLoading(false);
+  }, []);
+
+  // Check for stored user on mount
+  useEffect(() => {
+    const initAuth = () => {
+      try {
+        const storedUser = authService.getStoredUser();
+        const token = localStorage.getItem('token');
+
+        if (storedUser && token) {
+          setUser(storedUser);
+          setIsAuthenticated(true);
+        } else if (token && !storedUser) {
+          // Token exists but user data missing - try to refetch
+          console.warn('Token exists but user data is missing');
+          // For now, just mark as authenticated but user will need to be fetched
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, [])
 
   const login = async (email, password) => {
@@ -88,7 +118,8 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     login,
     signUp,
-    logout
+    logout,
+    refreshUser
   }
 
   return (
